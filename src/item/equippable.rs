@@ -15,3 +15,13 @@ impl<'a> Equippable<'_> {
         println!("Equipping {} with {}", target.name, self.name);
     }
 }
+
+impl<'a> Copy for Equippable<'_> { }
+
+impl Clone for Equippable<'_> {
+    fn clone(&self) -> Self {
+        Equippable {
+            name: self.name,
+        }
+    }
+}

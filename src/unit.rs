@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rand::Rng;
 
-use crate::{Job, Spell};
+use crate::{item::equippable::Equippable, Job, Spell};
 
 pub struct Unit<'a> {
     pub name: &'a str,
@@ -42,6 +42,7 @@ pub struct Unit<'a> {
     pub job: Job,
     pub jobs: HashMap<Job, (i32, i32)>,
     pub spellbook: Vec<Spell<'a>>,
+    pub equipment: Vec<Equippable<'a>>,
 
     pub x: usize,
     pub y: usize,
@@ -83,6 +84,7 @@ impl<'a> Unit<'_> {
             job: Job::Soldier,
             jobs: HashMap::new(),
             spellbook: vec![],
+            equipment: vec![],
             x: 0,
             y: 0,
             z: 0
@@ -106,6 +108,17 @@ impl<'a> Unit<'_> {
             else {
                 self.spellbook.push(*spell);
                 println!("You have learned the spell: {}", spell.name);
+            }
+    }
+
+    pub fn equip(&mut self, item: &Equippable<'a>)
+        where 'a: 'static {
+            if self.equipment.iter().any(|equipment_item| equipment_item.name == item.name) {
+                println!("You have already equipped the item: {}", item.name);
+            }
+            else {
+                self.equipment.push(*item);
+                println!("You have equipped the item: {}", item.name);
             }
     }
 }

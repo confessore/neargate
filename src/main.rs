@@ -5,8 +5,11 @@ fn main() {
     warrior.accuracy = 10.0;
     warrior.evasion = 10.0;
     let mut mage = Unit::new("Mage");
-    let sword = Equippable::new("Sword");
-    sword.equip(&mut mage);
+    let weapon = Equippable::new("Weapon");
+    mage.equip(&weapon);
+    let armor = Equippable::new("Armor");
+    mage.equip(&armor);
+    mage.equip(&armor);
     let fireball = Spell::new("Fireball");
     let immunity = Spell::new("Immunity");
     mage.learn(&fireball);
