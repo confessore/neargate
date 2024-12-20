@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rand::Rng;
 
-use crate::Job;
+use crate::{Job, Spell};
 
 pub struct Unit<'a> {
     pub name: &'a str,
@@ -41,6 +41,7 @@ pub struct Unit<'a> {
 
     pub job: Job,
     pub jobs: HashMap<Job, (i32, i32)>,
+    pub spellbook: Vec<Spell<'a>>,
 
     pub x: usize,
     pub y: usize,
@@ -81,18 +82,30 @@ impl<'a> Unit<'_> {
             targetable: true,
             job: Job::Soldier,
             jobs: HashMap::new(),
+            spellbook: vec![],
             x: 0,
             y: 0,
             z: 0
         }
     }
 
-    pub fn attack(&mut self, target: &mut Unit) {
+    pub fn attack(&mut self, target: &mut Unit<'a>) {
         let mut rng = rand::thread_rng();
         let hit_chance = rng.gen_range(0.0..100.0);
         if hit_chance < self.accuracy {
             let damage = rng.gen_range(0.0..self.strength);
             target.current_health -= damage;
         }
+    }
+
+    pub fn learn(&mut self, spell: &Spell<'a>)
+        where 'a: 'static {
+            if self.spellbook.iter().any(|spellbook_spell| spellbook_spell.name == spell.name) {
+                println!("You have already learned the spell: {}", spell.name);
+            }
+            else {
+                self.spellbook.push(*spell);
+                println!("You have learned the spell: {}", spell.name);
+            }
     }
 }
