@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use crate::{SpellEffect, SpellType, SPELL_EFFECTS};
+use lazy_static::lazy_static;
 
 pub mod spell_effect;
 pub mod spell_type;
@@ -7,7 +10,7 @@ pub struct Spell<'a> {
     pub name: &'a str,
     pub value: i32,
     pub spell_type: SpellType,
-    pub effect: Option<SpellEffect<'a>>,
+    pub effects: Vec<SpellEffect<'a>>,
 }
 
 impl<'a> Spell<'_> {
@@ -16,12 +19,10 @@ impl<'a> Spell<'_> {
             name,
             value: 0,
             spell_type: SpellType::None,
-            effect: None,
+            effects: vec![],
         }
     }
 }
-
-impl Copy for Spell<'_> { }
 
 impl Clone for Spell<'_> {
     fn clone(&self) -> Self {
@@ -29,16 +30,52 @@ impl Clone for Spell<'_> {
             name: self.name,
             value: self.value,
             spell_type: self.spell_type,
-            effect: self.effect.clone(),
+            effects: self.effects.clone(),
         }
     }
 }
 
-pub const SPELLS: [Spell; 6] = [    
-    Spell { name: "Fireball", value: 20, spell_type: SpellType::Debuff, effect: Some(SPELL_EFFECTS[0]) },
-    Spell { name: "Frostbolt", value: 15, spell_type: SpellType::Debuff, effect: None },
-    Spell { name: "Lightning", value: 25, spell_type: SpellType::Debuff, effect: None },
-    Spell { name: "Heal", value: 35, spell_type: SpellType::Buff, effect: None },
-    Spell { name: "Bless", value: 0, spell_type: SpellType::Buff, effect: None },
-    Spell { name: "Curse", value: 0, spell_type: SpellType::Debuff, effect: None },
-];
+    lazy_static! {
+        pub static ref SPELLS: HashMap<&'static str, Spell<'static>> = {
+            let map = HashMap::from([
+                ("Fireball", Spell {
+                    name: "Fireball",
+                    value: 20,
+                    spell_type:
+                    SpellType::Debuff,
+                    effects: vec![ SPELL_EFFECTS["Ignite"].clone()
+                ]}),
+                ("Frostbolt", Spell {
+                    name: "Frostbolt",
+                    value: 15,
+                    spell_type: SpellType::Debuff,
+                    effects: vec![] 
+                }),
+                ("Lightning", Spell {
+                    name: "Lightning",
+                    value: 25,
+                    spell_type: SpellType::Debuff,
+                    effects: vec![]
+                }),
+                ("Heal", Spell {
+                    name: "Heal",
+                    value: 35,
+                    spell_type: SpellType::Buff,
+                    effects: vec![]
+                }),
+                ("Bless", Spell {
+                    name: "Bless",
+                    value: 0,
+                    spell_type: SpellType::Buff,
+                    effects: vec![]
+                }),
+                ("Curse", Spell {
+                    name: "Curse",
+                    value: 0,
+                    spell_type: SpellType::Debuff,
+                    effects: vec![]
+                }),
+            ]);
+            map
+        };
+    }
