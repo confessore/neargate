@@ -1,7 +1,6 @@
-use crate::{EquippableSlot, Unit};
 use super::Item;
+use crate::{EquippableSlot, Unit};
 pub mod equippable_slot;
-
 
 pub struct Equippable<'a> {
     pub name: &'a str,
@@ -23,7 +22,9 @@ impl<'a> Equippable<'_> {
 
 impl<'a> Item<'a> for Equippable<'a> {
     fn use_item(&self, target: &mut Unit)
-    where 'a: 'static {
+    where
+        'a: 'static,
+    {
         target.equip(self);
     }
 }

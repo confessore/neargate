@@ -10,7 +10,11 @@ pub use crate::{
     aura::{Aura, AURAS},
     damage::{MagicalDamage, PhysicalDamage},
     effect::{Effect, EFFECTS},
-    item::{consumable::{Consumable, CONSUMABLES}, equippable::{Equippable, equippable_slot::EquippableSlot}, Item},
+    item::{
+        consumable::{Consumable, CONSUMABLES},
+        equippable::{equippable_slot::EquippableSlot, Equippable},
+        Item,
+    },
     job::{job_type::JobType, Job},
     spell::{spell_type::SpellType, Spell, SPELLS},
     unit::Unit,

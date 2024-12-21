@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use rand::Rng;
 
 use crate::{
-    Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType, Spell, SpellType
+    Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType, Spell, SpellType,
 };
 
 pub struct Unit<'a> {
@@ -59,7 +59,6 @@ pub struct Unit<'a> {
     pub spellbook: Vec<&'a str>,
     pub effects: Vec<Effect<'a>>,
     pub auras: Vec<Aura<'a>>,
-
 
     pub x: usize,
     pub y: usize,
@@ -185,7 +184,11 @@ impl<'a> Unit<'_> {
     where
         'a: 'static,
     {
-        if self.spellbook.iter().any(|spell_name| spell_name == &spell.name) {
+        if self
+            .spellbook
+            .iter()
+            .any(|spell_name| spell_name == &spell.name)
+        {
             println!("You have already learned the spell: {}", spell.name);
         } else {
             self.spellbook.push(spell.name);
@@ -197,12 +200,11 @@ impl<'a> Unit<'_> {
     where
         'a: 'static,
     {
-        if self
-            .equipment.contains_key(&equippable.equippable_slot)
-        {
+        if self.equipment.contains_key(&equippable.equippable_slot) {
             println!("You have already equipped the item: {}", equippable.name);
         } else {
-            self.equipment.insert(equippable.equippable_slot, *equippable);
+            self.equipment
+                .insert(equippable.equippable_slot, *equippable);
             println!("You have equipped the item: {}", equippable.name);
         }
     }

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::Unit;
 use super::Item;
+use crate::Unit;
 use lazy_static::lazy_static;
 
 pub struct Consumable<'a> {
@@ -16,7 +16,9 @@ impl Consumable<'_> {
 
 impl<'a> Item<'a> for Consumable<'a> {
     fn use_item(&self, target: &mut Unit)
-    where 'a: 'static {
+    where
+        'a: 'static,
+    {
         target.consume(self);
     }
 }
@@ -31,14 +33,7 @@ impl Clone for Consumable<'_> {
 
 lazy_static! {
     pub static ref CONSUMABLES: HashMap<&'static str, Consumable<'static>> = {
-        let map = HashMap::from([
-            (
-                "Potion",
-                Consumable {
-                    name: "Potion",
-                },
-            ),
-        ]);
+        let map = HashMap::from([("Potion", Consumable { name: "Potion" })]);
         map
     };
 }
