@@ -8,8 +8,8 @@ pub mod unit;
 pub use crate::{
     damage::{MagicalDamage, PhysicalDamage},
     effect::Effect,
-    item::Item,
-    job::Job,
+    item::{Item, consumable::Consumable, equippable::Equippable},
+    job::{Job, job_type::JobType},
     spell::Spell,
     unit::Unit
 };

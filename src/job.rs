@@ -1,43 +1,31 @@
-// jobs are what makes units unique and different from each other
-pub enum Job {
-    // most weapon masters began as soldiers
-    // t1
-    Soldier,
-    // many spell casters began as students
-    // t1
-    Student,
+use crate::JobType;
 
-    // strength based soldier
-    // t2
-    Duelist,
-    // agility based physical damage dealer
-    // t2
-    Scout,
-    // duelist scout combination
-    // t3, t4
-    Mercenary, Vanguard,
+pub mod job_type;
 
-    // direct damage spells
-    // t2
-    Arcanist,
-    // buff/debuff spells
-    // t2
-    Theurgist,
-    // arcanist theurgist combination
-    // t3, t4
-    Scholar, Conduit,
+pub struct Job {
+    pub job_type: JobType,
+    pub level: u8,
+    pub experience: u32,
+    pub max_experience: u32,
+    pub points: u32,
+}
 
-    // duelist arcanist combination
-    // t3, t4
-    Custodian, Warden,
-    // duelist theurgist combination
-    // t3, t4
-    Templar, Crusader,
+impl Job {
+    pub fn new(job_type: JobType) -> Job {
+        Job {
+            job_type,
+            level: 1,
+            experience: 0,
+            max_experience: 100,
+            points: 0,
+        }
+    }
 
-    // scout arcanist combination
-    // t3, t4
-    Tactician, Strategist,
-    // scout theurgist combination
-    //t3, t4
-    Missionary, Orator,
+    pub fn level_up(&mut self) {
+        if self.level < std::u8::MAX {
+            self.level += 1;
+            self.experience = 0;
+            self.max_experience *= 3 / 2;
+        }
+    }
 }

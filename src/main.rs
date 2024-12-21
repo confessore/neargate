@@ -1,4 +1,4 @@
-use neargate::{item::equippable::Equippable, Spell, Unit};
+use neargate::{Equippable, JobType, Spell, Unit};
 
 fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -18,11 +18,19 @@ fn main() {
     for spell in mage.spellbook.iter() {
         println!("Mage has learned: {}", spell.name);
     }
+    mage.set_job(JobType::Theurgist);
+    for job in mage.jobs.iter() {
+        println!("Mage has the job: {:?}", job.1.job_type);
+    }
 
     warrior.attack(&mut mage);
     mage.attack(&mut warrior);
     println!("Warrior: {} HP", warrior.current_health);
     println!("Mage: {} HP", mage.current_health);
+
+    if let Some(job) = mage.jobs.get_key_value(&JobType::Theurgist) {
+        println!("Mage has {} points in the {} job", job.1.points, job.1.job_type);
+    }
     
 
 }

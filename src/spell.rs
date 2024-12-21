@@ -1,5 +1,3 @@
-use crate::Unit;
-
 pub struct Spell<'a> {
     pub name: &'a str,
 }

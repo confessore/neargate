@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rand::Rng;
 
-use crate::{item::equippable::Equippable, Job, Spell};
+use crate::{item::equippable::Equippable, job::job_type::JobType, Job, Spell};
 
 pub struct Unit<'a> {
     pub name: &'a str,
@@ -26,10 +26,10 @@ pub struct Unit<'a> {
     pub critical: f32,
     pub critical_resist: f32,
 
-    pub experience: f32,
-    pub max_experience: f32,
-    pub level: i32,
-    pub max_level: i32,
+    pub experience: u32,
+    pub max_experience: u32,
+    pub level: u8,
+    pub max_level: u8,
 
     pub burrowed: bool,
     pub cloaked: bool,
@@ -39,8 +39,8 @@ pub struct Unit<'a> {
     pub selectable: bool,
     pub targetable: bool,
 
-    pub job: Job,
-    pub jobs: HashMap<Job, (i32, i32)>,
+    pub job: JobType,
+    pub jobs: HashMap<JobType, Job>,
     pub spellbook: Vec<Spell<'a>>,
     pub equipment: Vec<Equippable<'a>>,
 
@@ -51,10 +51,11 @@ pub struct Unit<'a> {
 
 impl<'a> Unit<'_> {
     pub fn new(name: &'a str) -> Unit<'a> {
+        let constitution = 10.0;
         Unit {
             name,
-            current_health: 100.0,
-            max_health: 100.0,
+            current_health: constitution * 10.0,
+            max_health: constitution * 10.0,
             current_magic: 100.0,
             max_magic: 100.0,
             physical_armor: 0.0,
@@ -62,18 +63,18 @@ impl<'a> Unit<'_> {
             constitution: 10.0,
             strength: 10.0,
             agility: 10.0,
-            intelligence: 10.0,
-            initiative: 10.0,
-            movement: 10.0,
-            jump: 10.0,
-            accuracy: 10.0,
-            evasion: 10.0,
+            intelligence: 0.0,
+            initiative: 0.0,
+            movement: 0.0,
+            jump: 0.0,
+            accuracy: 0.0,
+            evasion: 0.0,
             critical: 10.0,
             critical_resist: 10.0,
-            experience: 0.0,
-            max_experience: 100.0,
+            experience: 0,
+            max_experience: 100,
             level: 1,
-            max_level: 100,
+            max_level: 99,
             burrowed: false,
             cloaked: false,
             flying: false,
@@ -81,8 +82,10 @@ impl<'a> Unit<'_> {
             immune: false,
             selectable: true,
             targetable: true,
-            job: Job::Soldier,
-            jobs: HashMap::new(),
+            job: JobType::None,
+            jobs: HashMap::from([
+                (JobType::None, Job::new(JobType::None)),
+            ]),
             spellbook: vec![],
             equipment: vec![],
             x: 0,
@@ -98,6 +101,7 @@ impl<'a> Unit<'_> {
             let damage = rng.gen_range(0.0..self.strength);
             target.current_health -= damage;
         }
+        self.jobs.get_mut(&self.job).unwrap().points += 6;
     }
 
     pub fn learn(&mut self, spell: &Spell<'a>)
@@ -120,5 +124,13 @@ impl<'a> Unit<'_> {
                 self.equipment.push(*item);
                 println!("You have equipped the item: {}", item.name);
             }
+    }
+
+    pub fn set_job(&mut self, job_type: JobType) {
+        self.job = job_type;
+        if !self.jobs.contains_key(&job_type) {
+            self.jobs.insert(job_type, Job::new(job_type));
+        }
+        println!("{} set their job to: {:?}", self.name, self.job);
     }
 }
