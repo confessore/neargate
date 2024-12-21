@@ -4,7 +4,7 @@ use rand::Rng;
 
 use crate::{
     Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType, Spell, SpellType,
-    EFFECTS,
+    AURAS, EFFECTS,
 };
 
 pub struct Unit<'a> {
@@ -54,12 +54,14 @@ pub struct Unit<'a> {
 
     pub job: JobType,
     pub jobs: HashMap<JobType, Job>,
+    // Name of the consumable and quantity
     pub consumables: HashMap<&'a str, u32>,
     pub equippables: Vec<Equippable<'a>>,
     pub equipment: HashMap<EquippableSlot, Equippable<'a>>,
     pub spellbook: Vec<&'a str>,
+    // Name of the effect and how many turns are remaining
     pub effects: HashMap<&'a str, u8>,
-    pub auras: Vec<Aura<'a>>,
+    pub auras: Vec<&'a str>,
 
     pub x: usize,
     pub y: usize,
@@ -121,7 +123,7 @@ impl<'a> Unit<'_> {
         self.constitution += self
             .auras
             .iter()
-            .map(|aura| self.constitution * aura.constitution)
+            .map(|aura| self.constitution * &AURAS[aura].constitution)
             .sum::<f32>();
         self.max_health = self.constitution * 10.0;
         if self.current_health > self.max_health {
@@ -132,7 +134,7 @@ impl<'a> Unit<'_> {
         self.strength += self
             .auras
             .iter()
-            .map(|aura| self.strength * aura.strength)
+            .map(|aura| self.strength * &AURAS[aura].strength)
             .sum::<f32>();
 
         self.max_health = self.constitution * 10.0;
@@ -150,19 +152,22 @@ impl<'a> Unit<'_> {
 
     pub fn apply_auras(&mut self) {
         for aura in self.auras.iter() {
-            self.constitution += self.constitution * aura.constitution;
-            self.strength += self.strength * aura.strength;
-            self.agility += self.agility * aura.agility;
-            self.intelligence += self.intelligence * aura.intelligence;
+            let fetched_aura = &AURAS[aura];
+            self.constitution += self.constitution * fetched_aura.constitution;
+            self.strength += self.strength * fetched_aura.strength;
+            self.agility += self.agility * fetched_aura.agility;
+            self.intelligence += self.intelligence * fetched_aura.intelligence;
         }
 
         for effect in self.effects.iter() {
             let fetched_effect = &EFFECTS[effect.0];
             for aura in fetched_effect.auras.iter() {
-                self.constitution += self.constitution * aura.constitution;
-                self.strength += self.strength * aura.strength;
-                self.agility += self.agility * aura.agility;
-                self.intelligence += self.intelligence * aura.intelligence;
+                let fetched_aura = &AURAS[aura];
+                println!("{}", fetched_aura.description);
+                self.constitution += self.constitution * fetched_aura.constitution;
+                self.strength += self.strength * fetched_aura.strength;
+                self.agility += self.agility * fetched_aura.agility;
+                self.intelligence += self.intelligence * fetched_aura.intelligence;
             }
         }
     }

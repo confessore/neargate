@@ -23,20 +23,22 @@ fn main() {
         println!("Mage has the job: {:?}", job.1.job_type);
     }
     let savage_gladiator = AURAS["Savage Gladiator"];
-    mage.auras.push(savage_gladiator);
+    mage.auras.push(savage_gladiator.name);
     let cripple = AURAS["Cripple"];
-    mage.auras.push(cripple);
+    mage.auras.push(cripple.name);
     println!(
         "Mage has the aura: {} | {}",
-        mage.auras[0].name, mage.auras[0].description
+        mage.auras[0], &AURAS[mage.auras[0]].description
     );
     println!(
         "Mage has the aura: {} | {}",
-        mage.auras[1].name, mage.auras[1].description
+        mage.auras[1], &AURAS[mage.auras[1]].description
     );
     warrior.calculate_stats();
+    warrior.apply_auras();
     warrior.current_health = warrior.max_health;
     mage.calculate_stats();
+    mage.apply_auras();
     mage.current_health = mage.max_health;
 
     mage.consumables.insert("Potion", 1);
@@ -49,12 +51,16 @@ fn main() {
     }
 
     while warrior.is_alive() && mage.is_alive() {
+        warrior.calculate_stats();
+        warrior.apply_auras();
         warrior.attack(&mut mage);
         if warrior.is_alive() && mage.is_alive() {
             warrior.process_effects();
         }
 
         if warrior.is_alive() && mage.is_alive() {
+            mage.calculate_stats();
+            mage.apply_auras();
             mage.cast(&mut warrior, &SPELLS[mage.spellbook[0]]);
             if warrior.is_alive() && mage.is_alive() {
                 mage.process_effects();

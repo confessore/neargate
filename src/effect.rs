@@ -9,7 +9,7 @@ pub struct Effect<'a> {
     pub spell_type: SpellType,
     pub value: i32,
     pub turns: u8,
-    pub auras: Vec<Aura<'a>>,
+    pub auras: Vec<&'a str>,
 }
 
 impl Clone for Effect<'_> {
@@ -36,7 +36,7 @@ lazy_static! {
                     value: 5,
                     spell_type: SpellType::Debuff,
                     turns: 3,
-                    auras: vec![],
+                    auras: vec!["Burning"],
                 },
             ),
             (
@@ -47,7 +47,7 @@ lazy_static! {
                     value: 0,
                     spell_type: SpellType::Debuff,
                     turns: 3,
-                    auras: vec![AURAS["Slowed"]],
+                    auras: vec!["Slowed"],
                 },
             ),
         ]);

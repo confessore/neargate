@@ -9,6 +9,7 @@ pub struct Spell<'a> {
     pub name: &'a str,
     pub value: i32,
     pub spell_type: SpellType,
+    // Name of the effect and how many turns are remaining
     pub effects: HashMap<&'a str, u8>,
 }
 
