@@ -9,16 +9,16 @@ pub struct Spell<'a> {
     pub name: &'a str,
     pub value: i32,
     pub spell_type: SpellType,
-    pub effects: Vec<Effect<'a>>,
+    pub effects: HashMap<&'a str, u8>,
 }
 
 impl<'a> Spell<'_> {
-    pub const fn new(name: &'a str) -> Spell<'a> {
+    pub fn new(name: &'a str) -> Spell<'a> {
         Spell {
             name,
             value: 0,
             spell_type: SpellType::None,
-            effects: vec![],
+            effects: HashMap::new(),
         }
     }
 }
@@ -43,7 +43,10 @@ lazy_static! {
                     name: "Frostfire Bolt",
                     value: 20,
                     spell_type: SpellType::Debuff,
-                    effects: vec![EFFECTS["Ignite"].clone(), EFFECTS["Frost"].clone()],
+                    effects: HashMap::from([
+                        ("Ignite", EFFECTS["Ignite"].turns),
+                        ("Frost", EFFECTS["Frost"].turns),
+                    ]),
                 },
             ),
             (
@@ -52,7 +55,7 @@ lazy_static! {
                     name: "Frostbolt",
                     value: 15,
                     spell_type: SpellType::Debuff,
-                    effects: vec![EFFECTS["Frost"].clone()],
+                    effects: HashMap::from([("Frost", EFFECTS["Frost"].turns)]),
                 },
             ),
             (
@@ -61,7 +64,7 @@ lazy_static! {
                     name: "Lightning",
                     value: 25,
                     spell_type: SpellType::Debuff,
-                    effects: vec![],
+                    effects: HashMap::new(),
                 },
             ),
             (
@@ -70,7 +73,7 @@ lazy_static! {
                     name: "Heal",
                     value: 35,
                     spell_type: SpellType::Buff,
-                    effects: vec![],
+                    effects: HashMap::new(),
                 },
             ),
             (
@@ -79,7 +82,7 @@ lazy_static! {
                     name: "Bless",
                     value: 0,
                     spell_type: SpellType::Buff,
-                    effects: vec![],
+                    effects: HashMap::new(),
                 },
             ),
             (
@@ -88,7 +91,7 @@ lazy_static! {
                     name: "Curse",
                     value: 0,
                     spell_type: SpellType::Debuff,
-                    effects: vec![],
+                    effects: HashMap::new(),
                 },
             ),
         ]);

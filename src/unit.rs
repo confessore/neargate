@@ -4,6 +4,7 @@ use rand::Rng;
 
 use crate::{
     Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType, Spell, SpellType,
+    EFFECTS,
 };
 
 pub struct Unit<'a> {
@@ -57,7 +58,7 @@ pub struct Unit<'a> {
     pub equippables: Vec<Equippable<'a>>,
     pub equipment: HashMap<EquippableSlot, Equippable<'a>>,
     pub spellbook: Vec<&'a str>,
-    pub effects: Vec<Effect<'a>>,
+    pub effects: HashMap<&'a str, u8>,
     pub auras: Vec<Aura<'a>>,
 
     pub x: usize,
@@ -107,7 +108,7 @@ impl<'a> Unit<'_> {
             equippables: vec![],
             equipment: HashMap::new(),
             spellbook: vec![],
-            effects: vec![],
+            effects: HashMap::new(),
             auras: vec![],
             x: 0,
             y: 0,
@@ -145,6 +146,25 @@ impl<'a> Unit<'_> {
         self.evasion = self.agility * 0.1;
         self.critical = self.agility * 0.1;
         self.critical_resist = self.agility * 0.1;
+    }
+
+    pub fn apply_auras(&mut self) {
+        for aura in self.auras.iter() {
+            self.constitution += self.constitution * aura.constitution;
+            self.strength += self.strength * aura.strength;
+            self.agility += self.agility * aura.agility;
+            self.intelligence += self.intelligence * aura.intelligence;
+        }
+
+        for effect in self.effects.iter() {
+            let fetched_effect = &EFFECTS[effect.0];
+            for aura in fetched_effect.auras.iter() {
+                self.constitution += self.constitution * aura.constitution;
+                self.strength += self.strength * aura.strength;
+                self.agility += self.agility * aura.agility;
+                self.intelligence += self.intelligence * aura.intelligence;
+            }
+        }
     }
 
     pub fn attack(&mut self, target: &mut Unit<'a>) {
@@ -247,22 +267,18 @@ impl<'a> Unit<'_> {
                 // apply effects to the target
                 if spell.effects.len() > 0 {
                     for effect in spell.effects.iter() {
-                        if !target.effects.iter().any(|x| x.name == effect.name) {
-                            target.effects.push(effect.clone());
+                        let effect = &EFFECTS[effect.0];
+                        target.effects.insert(effect.name, effect.turns);
+                        if target.effects.contains_key(effect.name) {
+                            println!(
+                                "Duration of {} effect on {} reset",
+                                effect.name, target.name
+                            );
+                        } else {
                             println!(
                                 "{} is now affected by the {} effect",
                                 target.name, effect.name
                             );
-                        } else {
-                            if let Some(spell_effect) =
-                                target.effects.iter_mut().find(|x| x.name == effect.name)
-                            {
-                                spell_effect.turns = effect.turns;
-                                println!(
-                                    "The duration of the {} effect has been reset on {}",
-                                    effect.name, target.name
-                                );
-                            }
                         }
                     }
                 }
@@ -274,32 +290,33 @@ impl<'a> Unit<'_> {
     pub fn process_effects(&mut self) {
         let mut effects_to_remove = Vec::new();
         for effect in self.effects.iter_mut() {
-            if effect.turns > 0 {
-                effect.turns -= 1;
-                match effect.spell_type {
+            let fetched_effect = &EFFECTS[effect.0];
+            if *effect.1 > 0 {
+                *effect.1 -= 1;
+                match fetched_effect.spell_type {
                     SpellType::Buff => {
-                        self.current_health += effect.value as f32;
+                        self.current_health += fetched_effect.value as f32;
                         println!(
                             "{} healed {} from the {} effect",
-                            self.name, effect.value, effect.name
+                            self.name, fetched_effect.value, fetched_effect.name
                         );
                     }
                     SpellType::Debuff => {
-                        self.current_health -= effect.value as f32;
-                        if effect.value > 0 {
+                        self.current_health -= fetched_effect.value as f32;
+                        if fetched_effect.value > 0 {
                             println!(
                                 "{} took {} damage from the {} effect",
-                                self.name, effect.value, effect.name
+                                self.name, fetched_effect.value, fetched_effect.name
                             );
                         }
                     }
                     SpellType::None => {}
                 }
             } else {
-                effects_to_remove.push(effect.name);
+                effects_to_remove.push(fetched_effect.name);
             }
         }
         self.effects
-            .retain(|spell_effect| !effects_to_remove.contains(&spell_effect.name));
+            .retain(|effect_name, turns| !effects_to_remove.contains(&effect_name));
     }
 }

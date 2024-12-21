@@ -4,6 +4,7 @@ pub mod effect;
 pub mod item;
 pub mod job;
 pub mod spell;
+pub mod test;
 pub mod unit;
 
 pub use crate::{
