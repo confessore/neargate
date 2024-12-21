@@ -10,6 +10,6 @@ pub use crate::{
     effect::Effect,
     item::{Item, consumable::Consumable, equippable::Equippable},
     job::{Job, job_type::JobType},
-    spell::Spell,
+    spell::{Spell, SPELLS, spell_type::SpellType},
     unit::Unit
 };

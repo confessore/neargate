@@ -1,4 +1,4 @@
-use neargate::{Equippable, JobType, Spell, Unit};
+use neargate::{Equippable, JobType, Spell, Unit, SPELLS};
 
 fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -23,12 +23,12 @@ fn main() {
         println!("Mage has the job: {:?}", job.1.job_type);
     }
 
-    while warrior.current_health > 0.0 && mage.current_health > 0.0 {
-        if warrior.current_health > 0.0 {
+    while warrior.is_alive() && mage.is_alive() {
+        if warrior.is_alive() {
             warrior.attack(&mut mage);
         }
-        if mage.current_health > 0.0 {
-            mage.attack(&mut warrior);
+        if mage.is_alive() {
+            mage.cast(&mut warrior, &SPELLS[1]);
         }
     }
     println!("Warrior: {} HP", warrior.current_health);
@@ -37,6 +37,4 @@ fn main() {
     if let Some(job) = mage.jobs.get_key_value(&JobType::Theurgist) {
         println!("Mage has {} points in the {} job", job.1.points, job.1.job_type);
     }
-    
-
 }

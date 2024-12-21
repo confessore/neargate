@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rand::Rng;
 
-use crate::{item::equippable::Equippable, job::job_type::JobType, Job, Spell};
+use crate::{item::equippable::Equippable, job::job_type::JobType, Job, Spell, SpellType};
 
 pub struct Unit<'a> {
     pub name: &'a str,
@@ -146,5 +146,24 @@ impl<'a> Unit<'_> {
             self.jobs.insert(job_type, Job::new(job_type));
         }
         println!("{} set their job to: {:?}", self.name, self.job);
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.current_health > 0.0
+    }
+
+    pub fn cast(&self, target: &mut Unit<'a>, spell: &Spell<'a>) {
+        match spell.spell_type {
+            SpellType::Buff => {
+                target.current_health += spell.value as f32;
+            },
+            SpellType::Debuff => {
+                target.current_health -= spell.value as f32;
+            },
+            SpellType::None => {
+
+            }
+        }
+        println!("{} cast {} on {}", self.name, spell.name, target.name);
     }
 }
