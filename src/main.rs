@@ -24,11 +24,16 @@ fn main() {
     }
 
     while warrior.is_alive() && mage.is_alive() {
-        if warrior.is_alive() {
-            warrior.attack(&mut mage);
+        warrior.attack(&mut mage);
+        if warrior.is_alive() && mage.is_alive() {
+            warrior.process_effects();
         }
-        if mage.is_alive() {
-            mage.cast(&mut warrior, &SPELLS[1]);
+        
+        if warrior.is_alive() && mage.is_alive() {
+            mage.cast(&mut warrior, &SPELLS[0]);
+            if warrior.is_alive() && mage.is_alive() {
+                mage.process_effects();
+            }
         }
     }
     println!("Warrior: {} HP", warrior.current_health);
