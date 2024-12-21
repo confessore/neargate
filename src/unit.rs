@@ -51,11 +51,10 @@ pub struct Unit<'a> {
 
 impl<'a> Unit<'_> {
     pub fn new(name: &'a str) -> Unit<'a> {
-        let constitution = 10.0;
         Unit {
             name,
-            current_health: constitution * 10.0,
-            max_health: constitution * 10.0,
+            current_health: 100.0,
+            max_health: 100.0,
             current_magic: 100.0,
             max_magic: 100.0,
             physical_armor: 0.0,
@@ -63,14 +62,14 @@ impl<'a> Unit<'_> {
             constitution: 10.0,
             strength: 10.0,
             agility: 10.0,
-            intelligence: 0.0,
-            initiative: 0.0,
+            intelligence: 10.0,
+            initiative: 1.0,
             movement: 0.0,
             jump: 0.0,
             accuracy: 0.0,
             evasion: 0.0,
-            critical: 10.0,
-            critical_resist: 10.0,
+            critical: 0.0,
+            critical_resist: 0.0,
             experience: 0,
             max_experience: 100,
             level: 1,
@@ -95,13 +94,28 @@ impl<'a> Unit<'_> {
     }
 
     pub fn attack(&mut self, target: &mut Unit<'a>) {
+        let mut hit_chance = 95.0;
+        hit_chance -= target.evasion;
+        hit_chance += self.accuracy;
         let mut rng = rand::thread_rng();
-        let hit_chance = rng.gen_range(0.0..100.0);
-        if hit_chance < self.accuracy {
-            let damage = rng.gen_range(0.0..self.strength);
-            target.current_health -= damage;
+        let hit_roll = rng.gen_range(0.0..=100.0);
+        if hit_roll > hit_chance {
+            println!("{} missed {}", self.name, target.name);
+        } else {
+            let mut critical_chance = 95.0;
+            critical_chance -= target.critical_resist;
+            critical_chance += self.critical;
+            let critical_roll = rng.gen_range(0.0..=100.0);
+            if critical_roll > critical_chance {
+                target.current_health -= self.strength * 1.5;
+                self.jobs.get_mut(&self.job).unwrap().points += 9;
+                println!("{} critically hit {} for {} damage", self.name, target.name, self.strength * 1.5);
+            } else {
+                target.current_health -= self.strength;
+                self.jobs.get_mut(&self.job).unwrap().points += 6;
+                println!("{} hit {} for {} damage", self.name, target.name, self.strength);
+            }
         }
-        self.jobs.get_mut(&self.job).unwrap().points += 6;
     }
 
     pub fn learn(&mut self, spell: &Spell<'a>)
