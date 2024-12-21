@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use rand::Rng;
 
 use crate::{
-    aura::Aura, item::equippable::Equippable, job::job_type::JobType, Job, Spell, SpellEffect,
-    SpellType,
+    Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType, Spell, SpellType
 };
 
 pub struct Unit<'a> {
@@ -54,10 +53,13 @@ pub struct Unit<'a> {
 
     pub job: JobType,
     pub jobs: HashMap<JobType, Job>,
-    pub spellbook: Vec<Spell<'a>>,
-    pub equipment: Vec<Equippable<'a>>,
-    pub spell_effects: Vec<SpellEffect<'a>>,
+    pub consumables: HashMap<&'a str, u32>,
+    pub equippables: Vec<Equippable<'a>>,
+    pub equipment: HashMap<EquippableSlot, Equippable<'a>>,
+    pub spellbook: Vec<&'a str>,
+    pub effects: Vec<Effect<'a>>,
     pub auras: Vec<Aura<'a>>,
+
 
     pub x: usize,
     pub y: usize,
@@ -102,9 +104,11 @@ impl<'a> Unit<'_> {
             targetable: true,
             job: JobType::None,
             jobs: HashMap::from([(JobType::None, Job::new(JobType::None))]),
+            consumables: HashMap::new(),
+            equippables: vec![],
+            equipment: HashMap::new(),
             spellbook: vec![],
-            equipment: vec![],
-            spell_effects: vec![],
+            effects: vec![],
             auras: vec![],
             x: 0,
             y: 0,
@@ -181,28 +185,33 @@ impl<'a> Unit<'_> {
     where
         'a: 'static,
     {
-        if self.spellbook.iter().any(|x| x.name == spell.name) {
+        if self.spellbook.iter().any(|spell_name| spell_name == &spell.name) {
             println!("You have already learned the spell: {}", spell.name);
         } else {
-            self.spellbook.push(spell.clone());
+            self.spellbook.push(spell.name);
             println!("You have learned the spell: {}", spell.name);
         }
     }
 
-    pub fn equip(&mut self, item: &Equippable<'a>)
+    pub fn equip(&mut self, equippable: &Equippable<'a>)
     where
         'a: 'static,
     {
         if self
-            .equipment
-            .iter()
-            .any(|equipment_item| equipment_item.name == item.name)
+            .equipment.contains_key(&equippable.equippable_slot)
         {
-            println!("You have already equipped the item: {}", item.name);
+            println!("You have already equipped the item: {}", equippable.name);
         } else {
-            self.equipment.push(*item);
-            println!("You have equipped the item: {}", item.name);
+            self.equipment.insert(equippable.equippable_slot, *equippable);
+            println!("You have equipped the item: {}", equippable.name);
         }
+    }
+
+    pub fn consume(&mut self, consumable: &Consumable<'a>)
+    where
+        'a: 'static,
+    {
+        println!("{} consumed the item: {}", self.name, consumable.name);
     }
 
     pub fn set_job(&mut self, job_type: JobType) {
@@ -223,27 +232,28 @@ impl<'a> Unit<'_> {
     {
         match spell.spell_type {
             SpellType::Buff => {
+                // heal the target
                 target.current_health += spell.value as f32;
             }
             SpellType::Debuff => {
+                // damage the target
                 target.current_health -= spell.value as f32;
                 println!(
                     "{} cast {} on {} for {} damage",
                     self.name, spell.name, target.name, spell.value
                 );
+                // apply effects to the target
                 if spell.effects.len() > 0 {
                     for effect in spell.effects.iter() {
-                        if !target.spell_effects.iter().any(|x| x.name == effect.name) {
-                            target.spell_effects.push(effect.clone());
+                        if !target.effects.iter().any(|x| x.name == effect.name) {
+                            target.effects.push(effect.clone());
                             println!(
                                 "{} is now affected by the {} effect",
                                 target.name, effect.name
                             );
                         } else {
-                            if let Some(spell_effect) = target
-                                .spell_effects
-                                .iter_mut()
-                                .find(|x| x.name == effect.name)
+                            if let Some(spell_effect) =
+                                target.effects.iter_mut().find(|x| x.name == effect.name)
                             {
                                 spell_effect.turns = effect.turns;
                                 println!(
@@ -261,7 +271,7 @@ impl<'a> Unit<'_> {
 
     pub fn process_effects(&mut self) {
         let mut effects_to_remove = Vec::new();
-        for effect in self.spell_effects.iter_mut() {
+        for effect in self.effects.iter_mut() {
             if effect.turns > 0 {
                 effect.turns -= 1;
                 match effect.spell_type {
@@ -287,7 +297,7 @@ impl<'a> Unit<'_> {
                 effects_to_remove.push(effect.name);
             }
         }
-        self.spell_effects
+        self.effects
             .retain(|spell_effect| !effects_to_remove.contains(&spell_effect.name));
     }
 }

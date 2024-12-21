@@ -1,4 +1,4 @@
-use neargate::{Equippable, JobType, Spell, Unit, AURAS, SPELLS};
+use neargate::{Equippable, Item, JobType, Spell, Unit, AURAS, CONSUMABLES, SPELLS};
 
 fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -10,13 +10,13 @@ fn main() {
     let armor = Equippable::new("Armor");
     mage.equip(&armor);
     mage.equip(&armor);
-    let frostfire_bolt = Spell::new("Frostfire Bolt");
+    let frostfire_bolt = &SPELLS["Frostfire Bolt"];
     let immunity = Spell::new("Immunity");
     mage.learn(&frostfire_bolt);
     mage.learn(&frostfire_bolt);
     mage.learn(&immunity);
-    for spell in mage.spellbook.iter() {
-        println!("Mage has learned: {}", spell.name);
+    for spell_name in mage.spellbook.iter() {
+        println!("Mage has learned: {}", spell_name);
     }
     mage.set_job(JobType::Theurgist);
     for job in mage.jobs.iter() {
@@ -39,6 +39,15 @@ fn main() {
     mage.calculate_stats();
     mage.current_health = mage.max_health;
 
+    mage.consumables.insert("Potion", 1);
+
+    let consumables_keys: Vec<_> = mage.consumables.keys().cloned().collect();
+    for key in consumables_keys {
+        println!("Mage has the consumable: {}", key);
+        let item = &CONSUMABLES[&key];
+        item.use_item(&mut mage);
+    }
+
     while warrior.is_alive() && mage.is_alive() {
         warrior.attack(&mut mage);
         if warrior.is_alive() && mage.is_alive() {
@@ -46,7 +55,7 @@ fn main() {
         }
 
         if warrior.is_alive() && mage.is_alive() {
-            mage.cast(&mut warrior, &SPELLS["Frostfire Bolt"]);
+            mage.cast(&mut warrior, &SPELLS[mage.spellbook[0]]);
             if warrior.is_alive() && mage.is_alive() {
                 mage.process_effects();
             }

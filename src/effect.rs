@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{Aura, SpellType, AURAS};
 use lazy_static::lazy_static;
 
-pub struct SpellEffect<'a> {
+pub struct Effect<'a> {
     pub name: &'a str,
     pub description: &'a str,
     pub spell_type: SpellType,
@@ -12,9 +12,9 @@ pub struct SpellEffect<'a> {
     pub auras: Vec<Aura<'a>>,
 }
 
-impl Clone for SpellEffect<'_> {
+impl Clone for Effect<'_> {
     fn clone(&self) -> Self {
-        SpellEffect {
+        Effect {
             name: self.name,
             description: self.description,
             value: self.value,
@@ -26,11 +26,11 @@ impl Clone for SpellEffect<'_> {
 }
 
 lazy_static! {
-    pub static ref SPELL_EFFECTS: HashMap<&'static str, SpellEffect<'static>> = {
+    pub static ref EFFECTS: HashMap<&'static str, Effect<'static>> = {
         let map = HashMap::from([
             (
                 "Ignite",
-                SpellEffect {
+                Effect {
                     name: "Ignite",
                     description: "Burns the target with flames dealing 5 damage per turn",
                     value: 5,
@@ -41,7 +41,7 @@ lazy_static! {
             ),
             (
                 "Frost",
-                SpellEffect {
+                Effect {
                     name: "Frost",
                     description: "Chills the target with ice slowing their movement by 20%",
                     value: 0,

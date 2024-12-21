@@ -1,16 +1,15 @@
 use std::collections::HashMap;
 
-use crate::{SpellEffect, SpellType, SPELL_EFFECTS};
+use crate::{Effect, SpellType, EFFECTS};
 use lazy_static::lazy_static;
 
-pub mod spell_effect;
 pub mod spell_type;
 
 pub struct Spell<'a> {
     pub name: &'a str,
     pub value: i32,
     pub spell_type: SpellType,
-    pub effects: Vec<SpellEffect<'a>>,
+    pub effects: Vec<Effect<'a>>,
 }
 
 impl<'a> Spell<'_> {
@@ -44,10 +43,7 @@ lazy_static! {
                     name: "Frostfire Bolt",
                     value: 20,
                     spell_type: SpellType::Debuff,
-                    effects: vec![
-                        SPELL_EFFECTS["Ignite"].clone(),
-                        SPELL_EFFECTS["Frost"].clone(),
-                    ],
+                    effects: vec![EFFECTS["Ignite"].clone(), EFFECTS["Frost"].clone()],
                 },
             ),
             (
@@ -56,7 +52,7 @@ lazy_static! {
                     name: "Frostbolt",
                     value: 15,
                     spell_type: SpellType::Debuff,
-                    effects: vec![SPELL_EFFECTS["Frost"].clone()],
+                    effects: vec![EFFECTS["Frost"].clone()],
                 },
             ),
             (
