@@ -4,7 +4,7 @@ pub enum SpellType {
     Debuff,
 }
 
-impl Copy for SpellType { }
+impl Copy for SpellType {}
 
 impl Clone for SpellType {
     fn clone(&self) -> Self {

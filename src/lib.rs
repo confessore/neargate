@@ -8,8 +8,12 @@ pub mod unit;
 pub use crate::{
     aura::{Aura, AURAS},
     damage::{MagicalDamage, PhysicalDamage},
-    item::{Item, consumable::Consumable, equippable::Equippable},
-    job::{Job, job_type::JobType},
-    spell::{Spell, SPELLS, spell_effect::{SpellEffect, SPELL_EFFECTS}, spell_type::SpellType},
-    unit::Unit
+    item::{consumable::Consumable, equippable::Equippable, Item},
+    job::{job_type::JobType, Job},
+    spell::{
+        spell_effect::{SpellEffect, SPELL_EFFECTS},
+        spell_type::SpellType,
+        Spell, SPELLS,
+    },
+    unit::Unit,
 };

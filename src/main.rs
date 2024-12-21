@@ -10,10 +10,10 @@ fn main() {
     let armor = Equippable::new("Armor");
     mage.equip(&armor);
     mage.equip(&armor);
-    let fireball = Spell::new("Fireball");
+    let frostfire_bolt = Spell::new("Frostfire Bolt");
     let immunity = Spell::new("Immunity");
-    mage.learn(&fireball);
-    mage.learn(&fireball);
+    mage.learn(&frostfire_bolt);
+    mage.learn(&frostfire_bolt);
     mage.learn(&immunity);
     for spell in mage.spellbook.iter() {
         println!("Mage has learned: {}", spell.name);
@@ -26,8 +26,14 @@ fn main() {
     mage.auras.push(savage_gladiator);
     let cripple = AURAS["Cripple"];
     mage.auras.push(cripple);
-    println!("Mage has the aura: {} | {}", mage.auras[0].name, mage.auras[0].description);
-    println!("Mage has the aura: {} | {}", mage.auras[1].name, mage.auras[1].description);
+    println!(
+        "Mage has the aura: {} | {}",
+        mage.auras[0].name, mage.auras[0].description
+    );
+    println!(
+        "Mage has the aura: {} | {}",
+        mage.auras[1].name, mage.auras[1].description
+    );
     warrior.calculate_stats();
     warrior.current_health = warrior.max_health;
     mage.calculate_stats();
@@ -38,9 +44,9 @@ fn main() {
         if warrior.is_alive() && mage.is_alive() {
             warrior.process_effects();
         }
-        
+
         if warrior.is_alive() && mage.is_alive() {
-            mage.cast(&mut warrior, &SPELLS["Fireball"]);
+            mage.cast(&mut warrior, &SPELLS["Frostfire Bolt"]);
             if warrior.is_alive() && mage.is_alive() {
                 mage.process_effects();
             }
@@ -50,6 +56,9 @@ fn main() {
     println!("Mage: {} HP", mage.current_health);
 
     if let Some(job) = mage.jobs.get_key_value(&JobType::Theurgist) {
-        println!("Mage has {} points in the {} job", job.1.points, job.1.job_type);
+        println!(
+            "Mage has {} points in the {} job",
+            job.1.points, job.1.job_type
+        );
     }
 }

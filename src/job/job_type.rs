@@ -1,6 +1,5 @@
 use std::fmt::Display;
 
-
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub enum JobType {
     None,
@@ -19,7 +18,8 @@ pub enum JobType {
     Scout,
     // duelist scout combination
     // t3, t4
-    Mercenary, Vanguard,
+    Mercenary,
+    Vanguard,
 
     // direct damage spells
     // t2
@@ -29,24 +29,29 @@ pub enum JobType {
     Theurgist,
     // arcanist theurgist combination
     // t3, t4
-    Scholar, Conduit,
+    Scholar,
+    Conduit,
 
     // duelist arcanist combination
     // t3, t4
-    Custodian, Warden,
+    Custodian,
+    Warden,
     // duelist theurgist combination
     // t3, t4
-    Templar, Crusader,
+    Templar,
+    Crusader,
 
     // scout arcanist combination
     // t3, t4
-    Tactician, Strategist,
+    Tactician,
+    Strategist,
     // scout theurgist combination
     //t3, t4
-    Missionary, Orator,
+    Missionary,
+    Orator,
 }
 
-impl Copy for JobType { }
+impl Copy for JobType {}
 
 impl Clone for JobType {
     fn clone(&self) -> Self {
@@ -56,26 +61,30 @@ impl Clone for JobType {
 
 impl Display for JobType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            JobType::None => "None",
-            JobType::Soldier => "Soldier",
-            JobType::Student => "Student",
-            JobType::Duelist => "Duelist",
-            JobType::Scout => "Scout",
-            JobType::Mercenary => "Mercenary",
-            JobType::Vanguard => "Vanguard",
-            JobType::Arcanist => "Arcanist",
-            JobType::Theurgist => "Theurgist",
-            JobType::Scholar => "Scholar",
-            JobType::Conduit => "Conduit",
-            JobType::Custodian => "Custodian",
-            JobType::Warden => "Warden",
-            JobType::Templar => "Templar",
-            JobType::Crusader => "Crusader",
-            JobType::Tactician => "Tactician",
-            JobType::Strategist => "Strategist",
-            JobType::Missionary => "Missionary",
-            JobType::Orator => "Orator",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                JobType::None => "None",
+                JobType::Soldier => "Soldier",
+                JobType::Student => "Student",
+                JobType::Duelist => "Duelist",
+                JobType::Scout => "Scout",
+                JobType::Mercenary => "Mercenary",
+                JobType::Vanguard => "Vanguard",
+                JobType::Arcanist => "Arcanist",
+                JobType::Theurgist => "Theurgist",
+                JobType::Scholar => "Scholar",
+                JobType::Conduit => "Conduit",
+                JobType::Custodian => "Custodian",
+                JobType::Warden => "Warden",
+                JobType::Templar => "Templar",
+                JobType::Crusader => "Crusader",
+                JobType::Tactician => "Tactician",
+                JobType::Strategist => "Strategist",
+                JobType::Missionary => "Missionary",
+                JobType::Orator => "Orator",
+            }
+        )
     }
 }

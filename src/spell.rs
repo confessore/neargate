@@ -35,47 +35,67 @@ impl Clone for Spell<'_> {
     }
 }
 
-    lazy_static! {
-        pub static ref SPELLS: HashMap<&'static str, Spell<'static>> = {
-            let map = HashMap::from([
-                ("Fireball", Spell {
-                    name: "Fireball",
+lazy_static! {
+    pub static ref SPELLS: HashMap<&'static str, Spell<'static>> = {
+        let map = HashMap::from([
+            (
+                "Frostfire Bolt",
+                Spell {
+                    name: "Frostfire Bolt",
                     value: 20,
-                    spell_type:
-                    SpellType::Debuff,
-                    effects: vec![ SPELL_EFFECTS["Ignite"].clone()
-                ]}),
-                ("Frostbolt", Spell {
+                    spell_type: SpellType::Debuff,
+                    effects: vec![
+                        SPELL_EFFECTS["Ignite"].clone(),
+                        SPELL_EFFECTS["Frost"].clone(),
+                    ],
+                },
+            ),
+            (
+                "Frostbolt",
+                Spell {
                     name: "Frostbolt",
                     value: 15,
                     spell_type: SpellType::Debuff,
-                    effects: vec![] 
-                }),
-                ("Lightning", Spell {
+                    effects: vec![SPELL_EFFECTS["Frost"].clone()],
+                },
+            ),
+            (
+                "Lightning",
+                Spell {
                     name: "Lightning",
                     value: 25,
                     spell_type: SpellType::Debuff,
-                    effects: vec![]
-                }),
-                ("Heal", Spell {
+                    effects: vec![],
+                },
+            ),
+            (
+                "Heal",
+                Spell {
                     name: "Heal",
                     value: 35,
                     spell_type: SpellType::Buff,
-                    effects: vec![]
-                }),
-                ("Bless", Spell {
+                    effects: vec![],
+                },
+            ),
+            (
+                "Bless",
+                Spell {
                     name: "Bless",
                     value: 0,
                     spell_type: SpellType::Buff,
-                    effects: vec![]
-                }),
-                ("Curse", Spell {
+                    effects: vec![],
+                },
+            ),
+            (
+                "Curse",
+                Spell {
                     name: "Curse",
                     value: 0,
                     spell_type: SpellType::Debuff,
-                    effects: vec![]
-                }),
-            ]);
-            map
-        };
-    }
+                    effects: vec![],
+                },
+            ),
+        ]);
+        map
+    };
+}

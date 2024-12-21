@@ -11,7 +11,7 @@ pub struct Aura<'a> {
     pub intelligence: f32,
 }
 
-impl Copy for Aura<'_> { }
+impl Copy for Aura<'_> {}
 
 impl Clone for Aura<'_> {
     fn clone(&self) -> Self {
@@ -29,30 +29,50 @@ impl Clone for Aura<'_> {
 lazy_static! {
     pub static ref AURAS: HashMap<&'static str, Aura<'static>> = {
         let map = HashMap::from([
-            ("Savage Gladiator", Aura { 
-                name: "Savage Gladiator",
-                description: "All stats are increased by 5%",
-                constitution: 0.05,
-                strength: 0.05,
-                agility: 0.05,
-                intelligence: 0.05,
-            }),
-            ("Cripple", Aura { 
-                name: "Cripple",
-                description: "Constitution is decreased by 20%",
-                constitution: -0.20,
-                strength: 0.00,
-                agility: 0.00,
-                intelligence: 0.00,
-            }),
-            ("Burning", Aura {
-                name: "Burning",
-                description: "This unit is burning",
-                constitution: 0.00,
-                strength: 0.00,
-                agility: 0.00,
-                intelligence: 0.00,
-            })
+            (
+                "Savage Gladiator",
+                Aura {
+                    name: "Savage Gladiator",
+                    description: "All stats are increased by 5%",
+                    constitution: 0.05,
+                    strength: 0.05,
+                    agility: 0.05,
+                    intelligence: 0.05,
+                },
+            ),
+            (
+                "Cripple",
+                Aura {
+                    name: "Cripple",
+                    description: "Constitution is decreased by 20%",
+                    constitution: -0.20,
+                    strength: 0.00,
+                    agility: 0.00,
+                    intelligence: 0.00,
+                },
+            ),
+            (
+                "Burning",
+                Aura {
+                    name: "Burning",
+                    description: "This unit is burning",
+                    constitution: 0.00,
+                    strength: 0.00,
+                    agility: 0.00,
+                    intelligence: 0.00,
+                },
+            ),
+            (
+                "Slowed",
+                Aura {
+                    name: "Slowed",
+                    description: "This unit is slowed",
+                    constitution: 0.00,
+                    strength: 0.00,
+                    agility: 0.00,
+                    intelligence: 0.00,
+                },
+            ),
         ]);
         map
     };

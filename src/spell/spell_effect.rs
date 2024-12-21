@@ -28,24 +28,28 @@ impl Clone for SpellEffect<'_> {
 lazy_static! {
     pub static ref SPELL_EFFECTS: HashMap<&'static str, SpellEffect<'static>> = {
         let map = HashMap::from([
-            ("Ignite", SpellEffect {
-                name: "Ignite",
-                description: "Burns the target with flames dealing 5 damage per turn",
-                value: 5,
-                spell_type: SpellType::Debuff,
-                turns: 3,
-                auras: vec![],
-            },),
-            ("Cripple", SpellEffect {
-                name: "Frost",
-                description: "Chills the target with ice slowing their movement by 20%",
-                value: 0,
-                spell_type: SpellType::Debuff,
-                turns: 3,
-                auras: vec![
-                    AURAS["Cripple"]
-                ],
-            }),
+            (
+                "Ignite",
+                SpellEffect {
+                    name: "Ignite",
+                    description: "Burns the target with flames dealing 5 damage per turn",
+                    value: 5,
+                    spell_type: SpellType::Debuff,
+                    turns: 3,
+                    auras: vec![],
+                },
+            ),
+            (
+                "Frost",
+                SpellEffect {
+                    name: "Frost",
+                    description: "Chills the target with ice slowing their movement by 20%",
+                    value: 0,
+                    spell_type: SpellType::Debuff,
+                    turns: 3,
+                    auras: vec![AURAS["Slowed"]],
+                },
+            ),
         ]);
         map
     };

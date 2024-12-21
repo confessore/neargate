@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use rand::Rng;
 
-use crate::{aura::Aura, item::equippable::Equippable, job::job_type::JobType, Job, Spell, SpellEffect, SpellType};
+use crate::{
+    aura::Aura, item::equippable::Equippable, job::job_type::JobType, Job, Spell, SpellEffect,
+    SpellType,
+};
 
 pub struct Unit<'a> {
     pub name: &'a str,
@@ -27,7 +30,7 @@ pub struct Unit<'a> {
 
     pub intelligence: f32,
     pub base_intelligence: f32,
-    
+
     pub initiative: f32,
     pub movement: f32,
     pub jump: f32,
@@ -58,7 +61,7 @@ pub struct Unit<'a> {
 
     pub x: usize,
     pub y: usize,
-    pub z: usize
+    pub z: usize,
 }
 
 impl<'a> Unit<'_> {
@@ -98,22 +101,22 @@ impl<'a> Unit<'_> {
             selectable: true,
             targetable: true,
             job: JobType::None,
-            jobs: HashMap::from([
-                (JobType::None, Job::new(JobType::None)),
-            ]),
+            jobs: HashMap::from([(JobType::None, Job::new(JobType::None))]),
             spellbook: vec![],
             equipment: vec![],
             spell_effects: vec![],
             auras: vec![],
             x: 0,
             y: 0,
-            z: 0
+            z: 0,
         }
     }
 
     pub fn calculate_stats(&mut self) {
         self.constitution = self.base_constitution;
-        self.constitution += self.auras.iter()
+        self.constitution += self
+            .auras
+            .iter()
             .map(|aura| self.constitution * aura.constitution)
             .sum::<f32>();
         self.max_health = self.constitution * 10.0;
@@ -122,7 +125,9 @@ impl<'a> Unit<'_> {
         }
 
         self.strength = self.base_strength;
-        self.strength += self.auras.iter()
+        self.strength += self
+            .auras
+            .iter()
             .map(|aura| self.strength * aura.strength)
             .sum::<f32>();
 
@@ -155,35 +160,49 @@ impl<'a> Unit<'_> {
             if critical_roll > critical_chance {
                 target.current_health -= self.strength * 1.5;
                 self.jobs.get_mut(&self.job).unwrap().points += 9;
-                println!("{} critically hit {} for {} damage", self.name, target.name, self.strength * 1.5);
+                println!(
+                    "{} critically hit {} for {} damage",
+                    self.name,
+                    target.name,
+                    self.strength * 1.5
+                );
             } else {
                 target.current_health -= self.strength;
                 self.jobs.get_mut(&self.job).unwrap().points += 6;
-                println!("{} hit {} for {} damage", self.name, target.name, self.strength);
+                println!(
+                    "{} hit {} for {} damage",
+                    self.name, target.name, self.strength
+                );
             }
         }
     }
 
     pub fn learn(&mut self, spell: &Spell<'a>)
-        where 'a: 'static {
-            if self.spellbook.iter().any(|x| x.name == spell.name) {
-                println!("You have already learned the spell: {}", spell.name);
-            }
-            else {
-                self.spellbook.push(spell.clone());
-                println!("You have learned the spell: {}", spell.name);
-            }
+    where
+        'a: 'static,
+    {
+        if self.spellbook.iter().any(|x| x.name == spell.name) {
+            println!("You have already learned the spell: {}", spell.name);
+        } else {
+            self.spellbook.push(spell.clone());
+            println!("You have learned the spell: {}", spell.name);
+        }
     }
 
     pub fn equip(&mut self, item: &Equippable<'a>)
-        where 'a: 'static {
-            if self.equipment.iter().any(|equipment_item| equipment_item.name == item.name) {
-                println!("You have already equipped the item: {}", item.name);
-            }
-            else {
-                self.equipment.push(*item);
-                println!("You have equipped the item: {}", item.name);
-            }
+    where
+        'a: 'static,
+    {
+        if self
+            .equipment
+            .iter()
+            .any(|equipment_item| equipment_item.name == item.name)
+        {
+            println!("You have already equipped the item: {}", item.name);
+        } else {
+            self.equipment.push(*item);
+            println!("You have equipped the item: {}", item.name);
+        }
     }
 
     pub fn set_job(&mut self, job_type: JobType) {
@@ -199,31 +218,44 @@ impl<'a> Unit<'_> {
     }
 
     pub fn cast(&mut self, target: &mut Unit<'a>, spell: &Spell<'a>)
-        where 'a: 'static {
+    where
+        'a: 'static,
+    {
         match spell.spell_type {
             SpellType::Buff => {
                 target.current_health += spell.value as f32;
-            },
+            }
             SpellType::Debuff => {
                 target.current_health -= spell.value as f32;
-                println!("{} cast {} on {} for {} damage", self.name, spell.name, target.name, spell.value);
+                println!(
+                    "{} cast {} on {} for {} damage",
+                    self.name, spell.name, target.name, spell.value
+                );
                 if spell.effects.len() > 0 {
                     for effect in spell.effects.iter() {
                         if !target.spell_effects.iter().any(|x| x.name == effect.name) {
                             target.spell_effects.push(effect.clone());
-                            println!("{} is now affected by the {} effect", target.name, effect.name);
+                            println!(
+                                "{} is now affected by the {} effect",
+                                target.name, effect.name
+                            );
                         } else {
-                            if let Some(spell_effect) = target.spell_effects.iter_mut().find(|x| x.name == effect.name) {
+                            if let Some(spell_effect) = target
+                                .spell_effects
+                                .iter_mut()
+                                .find(|x| x.name == effect.name)
+                            {
                                 spell_effect.turns = effect.turns;
-                                println!("The duration of the {} effect has been reset on {}", effect.name, target.name);
+                                println!(
+                                    "The duration of the {} effect has been reset on {}",
+                                    effect.name, target.name
+                                );
                             }
                         }
                     }
                 }
-            },
-            SpellType::None => {
-
             }
+            SpellType::None => {}
         }
     }
 
@@ -235,20 +267,27 @@ impl<'a> Unit<'_> {
                 match effect.spell_type {
                     SpellType::Buff => {
                         self.current_health += effect.value as f32;
-                        println!("{} healed {} from the {} effect", self.name, effect.value, effect.name);
-                    },
+                        println!(
+                            "{} healed {} from the {} effect",
+                            self.name, effect.value, effect.name
+                        );
+                    }
                     SpellType::Debuff => {
                         self.current_health -= effect.value as f32;
-                        println!("{} took {} damage from the {} effect", self.name, effect.value, effect.name);
-                    },
-                    SpellType::None => {
-
+                        if effect.value > 0 {
+                            println!(
+                                "{} took {} damage from the {} effect",
+                                self.name, effect.value, effect.name
+                            );
+                        }
                     }
+                    SpellType::None => {}
                 }
             } else {
                 effects_to_remove.push(effect.name);
             }
         }
-        self.spell_effects.retain(|spell_effect| !effects_to_remove.contains(&spell_effect.name));
+        self.spell_effects
+            .retain(|spell_effect| !effects_to_remove.contains(&spell_effect.name));
     }
 }

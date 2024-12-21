@@ -6,9 +6,7 @@ pub struct Equippable<'a> {
 
 impl<'a> Equippable<'_> {
     pub fn new(name: &'a str) -> Equippable<'a> {
-        Equippable {
-            name,
-        }
+        Equippable { name }
     }
 
     pub fn equip(&self, target: &mut Unit) {
@@ -16,12 +14,10 @@ impl<'a> Equippable<'_> {
     }
 }
 
-impl<'a> Copy for Equippable<'_> { }
+impl<'a> Copy for Equippable<'_> {}
 
 impl Clone for Equippable<'_> {
     fn clone(&self) -> Self {
-        Equippable {
-            name: self.name,
-        }
+        Equippable { name: self.name }
     }
 }
