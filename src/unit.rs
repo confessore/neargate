@@ -38,7 +38,7 @@ pub struct Unit<'a> {
     pub evasion: f32,
     pub critical: f32,
     pub critical_resist: f32,
-
+    pub experience_rate: f32,
     pub experience: f32,
     pub max_experience: f32,
     pub level: u8,
@@ -93,6 +93,7 @@ impl<'a> Unit<'_> {
             evasion: 0.0,
             critical: 0.0,
             critical_resist: 0.0,
+            experience_rate: 0.0,
             experience: 0.0,
             max_experience: 100.0,
             level: 1,
@@ -123,6 +124,7 @@ impl<'a> Unit<'_> {
         self.strength = self.base_strength;
         self.agility = self.base_agility;
         self.intelligence = self.base_intelligence;
+        self.experience_rate = 1.0;
     }
 
     fn apply_base_auras(&mut self) {
@@ -159,6 +161,18 @@ impl<'a> Unit<'_> {
         self.evasion = self.agility * 0.1;
         self.critical = self.agility * 0.1;
         self.critical_resist = self.agility * 0.1;
+
+        self.experience_rate += self
+            .auras
+            .iter()
+            .map(|aura| self.experience_rate * &AURAS[aura].experience_rate)
+            .sum::<f32>();
+
+        self.initiative += self
+            .auras
+            .iter()
+            .map(|aura| self.initiative * &AURAS[aura].initiative)
+            .sum::<f32>();
 
         self.initiative += self
             .auras
@@ -220,7 +234,8 @@ impl<'a> Unit<'_> {
             self.evasion = self.agility * 0.1;
             self.critical = self.agility * 0.1;
             self.critical_resist = self.agility * 0.1;
-
+            
+            self.experience_rate += self.experience_rate * fetched_aura.experience_rate;
             self.initiative += self.initiative * fetched_aura.initiative;
             self.movement += self.movement * fetched_aura.jump;
             self.accuracy += self.accuracy * fetched_aura.accuracy;
@@ -256,6 +271,7 @@ impl<'a> Unit<'_> {
                 self.critical = self.agility * 0.1;
                 self.critical_resist = self.agility * 0.1;
 
+                self.experience_rate += self.experience_rate * fetched_aura.experience_rate;
                 self.initiative += self.initiative * fetched_aura.initiative;
                 self.movement += self.movement * fetched_aura.jump;
                 self.accuracy += self.accuracy * fetched_aura.accuracy;
