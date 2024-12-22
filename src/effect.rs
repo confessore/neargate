@@ -47,7 +47,7 @@ lazy_static! {
                     value: 0,
                     spell_type: SpellType::Debuff,
                     turns: 3,
-                    auras: vec!["Slowed"],
+                    auras: vec!["Chilled"],
                 },
             ),
         ]);

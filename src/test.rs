@@ -25,12 +25,10 @@ mod tests {
     #[test]
     fn test_unit_cast() {
         let mut unit = Unit::new("Unit");
-        unit.calculate_stats();
-        unit.apply_auras();
+        unit.prepare();
 
         let mut target = Unit::new("Target");
-        unit.calculate_stats();
-        unit.apply_auras();
+        target.prepare();
 
         // Cast a spell Unit doesn't know
         unit.cast(&mut target, &SPELLS["Frostfire Bolt"]);
