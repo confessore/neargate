@@ -234,7 +234,7 @@ impl<'a> Unit<'_> {
             self.evasion = self.agility * 0.1;
             self.critical = self.agility * 0.1;
             self.critical_resist = self.agility * 0.1;
-            
+
             self.experience_rate += self.experience_rate * fetched_aura.experience_rate;
             self.initiative += self.initiative * fetched_aura.initiative;
             self.movement += self.movement * fetched_aura.jump;
