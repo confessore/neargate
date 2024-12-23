@@ -32,5 +32,6 @@ mod tests {
 
         // Cast a spell Unit doesn't know
         unit.cast(&mut target, &SPELLS["Frostfire Bolt"]);
+        assert!(target.current_health != target.max_health);
     }
 }

@@ -79,8 +79,7 @@ use bevy::prelude::*;
 fn main() {
     App::new()
         .init_resource::<Game>()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(EguiPlugin)
+        .add_plugins((DefaultPlugins, MeshPickingPlugin, EguiPlugin))
         .init_resource::<OccupiedScreenSpace>()
         .init_state::<GameState>()
         .enable_state_scoped_entities::<GameState>()
@@ -214,7 +213,8 @@ fn setup_system(
         Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
         Transform::from_xyz(0.0, 0.5, 0.0),
-    ));
+    ))
+    .observe(on_drag_rotate);
     commands.spawn((
         PointLight {
             intensity: 1500.0,
@@ -236,6 +236,7 @@ fn ui_example_system(
     mut is_last_selected: Local<bool>,
     mut contexts: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut game: ResMut<Game>
 ) {
     let ctx = contexts.ctx_mut();
 
@@ -244,7 +245,7 @@ fn ui_example_system(
         .show(ctx, |ui| {
             ui.label("Left resizeable panel");
             if ui
-                .add(egui::widgets::Button::new("A button").selected(!*is_last_selected))
+                .add(egui::widgets::Button::new(game.board.len().to_string()).selected(!*is_last_selected))
                 .clicked()
             {
                 *is_last_selected = false;
@@ -287,4 +288,11 @@ fn ui_example_system(
         .response
         .rect
         .height();
+}
+
+fn on_drag_rotate(drag: Trigger<Pointer<Drag>>, mut transforms: Query<&mut Transform>) {
+    if let Ok(mut transform) = transforms.get_mut(drag.target) {
+        transform.rotate_y(drag.delta.x * 0.02);
+        transform.rotate_x(drag.delta.y * 0.02);
+    }
 }
