@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.15.0"
+bevy_egui = "0.31.1"
 lazy_static = "1.5.0"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
