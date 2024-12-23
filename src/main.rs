@@ -1,6 +1,7 @@
 use std::fmt;
 
-use bevy::{color::palettes::basic::*, prelude::*, ui};
+use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+use bevy::{color::palettes::basic::*, input::mouse::MouseButtonInput, prelude::*, ui};
 use bevy::{
     color::palettes::tailwind::*, picking::pointer::PointerInteraction, prelude::*,
     window::PrimaryWindow, winit::WinitSettings,
@@ -11,6 +12,7 @@ use neargate::{
 };
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
+use bevy::render::mesh::CylinderAnchor;
 
 /*fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -91,7 +93,8 @@ fn main() {
         //.add_systems(Startup, setup_cameras)
         .add_systems(Startup, setup_system)
         .add_systems(Update, ui_example_system)
-        .add_systems(Update, update_camera_transform_system)
+        //.add_systems(Update, update_camera_transform_system)
+        .add_systems(Update, camera_drag_system)
         .add_systems(OnEnter(GameState::Playing), setup)
         .run();
 }
@@ -166,6 +169,31 @@ fn setup(
 
     game.unit = Unit::new("Laurel");
     game.unit.prepare();
+
+    let cylinder_pos = Vec3::new(2.0, 1.0, 2.0);
+    commands.spawn((
+        Shape,
+        Mesh3d(meshes.add(Cylinder {
+            radius: 0.3,
+            half_height: 1.0,
+            ..Default::default()
+        })),
+        MeshMaterial3d(materials.add(Color::srgb(0.8, 0.2, 0.2))),
+        Transform::from_translation(cylinder_pos),
+    ))
+    .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
+    .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
+    .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
+    .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()));
+
+    game.unit.x = cylinder_pos.x as usize;
+    game.unit.y = cylinder_pos.y as usize;
+    game.unit.z = cylinder_pos.z as usize;
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(cylinder_pos.x, cylinder_pos.y + 3.0, cylinder_pos.z + 5.0)
+            .looking_at(cylinder_pos, Vec3::Y),
+    ));
 }
 
 const BOARD_SIZE_I: usize = 14;
@@ -192,35 +220,6 @@ const CAMERA_TARGET: Vec3 = Vec3::ZERO;
 
 #[derive(Resource, Deref, DerefMut)]
 struct OriginalCameraTransform(Transform);
-
-fn update_camera_transform_system(
-    occupied_screen_space: Res<OccupiedScreenSpace>,
-    original_camera_transform: Res<OriginalCameraTransform>,
-    windows: Query<&Window, With<PrimaryWindow>>,
-    mut camera_query: Query<(&Projection, &mut Transform)>,
-) {
-    let (camera_projection, mut transform) = match camera_query.get_single_mut() {
-        Ok((Projection::Perspective(projection), transform)) => (projection, transform),
-        _ => unreachable!(),
-    };
-
-    let distance_to_target = (CAMERA_TARGET - original_camera_transform.translation).length();
-    let frustum_height = 2.0 * distance_to_target * (camera_projection.fov * 0.5).tan();
-    let frustum_width = frustum_height * camera_projection.aspect_ratio;
-
-    let window = windows.single();
-
-    let left_taken = occupied_screen_space.left / window.width();
-    let right_taken = occupied_screen_space.right / window.width();
-    let top_taken = occupied_screen_space.top / window.height();
-    let bottom_taken = occupied_screen_space.bottom / window.height();
-    transform.translation = original_camera_transform.translation
-        + transform.rotation.mul_vec3(Vec3::new(
-            (right_taken - left_taken) * frustum_width * 0.5,
-            (top_taken - bottom_taken) * frustum_height * 0.5,
-            0.0,
-        ));
-}
 
 fn setup_system(
     mut commands: Commands,
@@ -254,13 +253,6 @@ fn setup_system(
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
-
-    let camera_pos = Vec3::new(-2.0, 2.5, 5.0);
-    let camera_transform =
-        Transform::from_translation(camera_pos).looking_at(CAMERA_TARGET, Vec3::Y);
-    commands.insert_resource(OriginalCameraTransform(camera_transform));
-
-    commands.spawn((Camera3d::default(), camera_transform));
 }
 
 fn ui_example_system(
@@ -388,3 +380,62 @@ struct Shape;
 const SHAPES_X_EXTENT: f32 = 14.0;
 const EXTRUSION_X_EXTENT: f32 = 16.0;
 const Z_EXTENT: f32 = 5.0;
+
+fn camera_drag_system(
+    mouse_button: Res<ButtonInput<MouseButton>>,
+    mut mouse_wheel: EventReader<MouseWheel>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut last_pos: Local<Option<Vec2>>,
+
+    mut camera_query: Query<&mut Transform, (With<Camera3d>, Without<PointerInteraction>)>,
+    game: Res<Game<'static>>,
+) {
+    let location = Vec3::from([game.unit.x as f32, game.unit.y as f32, game.unit.z as f32]);
+    if let Some(window) = windows.iter().next() {
+        let cursor_pos = window.cursor_position();
+        if mouse_button.pressed(MouseButton::Left) {
+            if let (Some(mut transform), Some(pos), Some(new_pos)) =
+                (camera_query.iter_mut().next(), *last_pos, cursor_pos)
+            {
+                let delta = new_pos - pos;
+                transform.translation.x -= delta.x * 0.01;
+                transform.translation.z += delta.y * 0.01;
+            }
+        }
+        if mouse_button.pressed(MouseButton::Right) {
+            if let (Some(mut transform), Some(pos), Some(new_pos)) =
+                (camera_query.iter_mut().next(), *last_pos, cursor_pos)
+            {
+                // rotate the camera around the location
+                let delta = new_pos - pos;
+                transform.translation = Quat::from_rotation_y(-delta.x * 0.01) * (transform.translation - location) + location;
+                transform.translation = Quat::from_rotation_x(-delta.y * 0.01) * (transform.translation - location) + location;
+                // keep the translation from looking at the bottom of the board
+                transform.translation.y = (transform.translation - location).y.max(1.0) + location.y;
+                
+                transform.look_at(location, Vec3::Y);
+            }
+        }
+
+        for event in mouse_wheel.read() {
+            match event.unit {
+                MouseScrollUnit::Line => {
+                    println!("Scroll (line units): vertical: {}, horizontal: {}", event.y, event.x);
+                    let mut transform = camera_query.iter_mut().next().unwrap();
+                    // this should be how close to location the transform is
+                    let distance = (transform.translation - location).length();
+                    let transform_translation = transform.translation;
+                    transform.translation += (transform_translation - location).normalize() * event.y * 0.1;
+                    // prevent the camera from getting too close
+                    if (transform.translation - location).length() < 1.0 {
+                        transform.translation = transform_translation;
+                    }
+                }
+                MouseScrollUnit::Pixel => {
+                    println!("Scroll (pixel units): vertical: {}, horizontal: {}", event.y, event.x);
+                }
+            }
+        }
+        *last_pos = cursor_pos;
+    }
+}
