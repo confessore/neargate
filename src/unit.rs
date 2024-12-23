@@ -7,6 +7,7 @@ use crate::{
     AURAS, EFFECTS,
 };
 
+#[derive(Default)]
 pub struct Unit<'a> {
     pub name: &'a str,
 
@@ -448,6 +449,7 @@ impl<'a> Unit<'_> {
     pub fn prepare(&mut self) {
         self.calculate_stats();
         self.current_health = self.max_health;
+        self.current_magic = self.max_magic;
     }
 
     pub fn calculate_stats(&mut self) {

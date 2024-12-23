@@ -1,7 +1,8 @@
 use std::fmt::Display;
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Eq, PartialEq, Hash, Default)]
 pub enum JobType {
+    #[default]
     None,
     // most weapon masters began as soldiers
     // t1

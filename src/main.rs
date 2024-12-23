@@ -1,11 +1,16 @@
+use std::fmt;
+
 use bevy::{color::palettes::basic::*, prelude::*, ui};
+use bevy::{
+    color::palettes::tailwind::*, picking::pointer::PointerInteraction, prelude::*,
+    window::PrimaryWindow, winit::WinitSettings,
+};
+use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use neargate::{
     Cell, Equippable, Game, GameState, Item, JobType, Spell, Unit, AURAS, CONSUMABLES, SPELLS,
 };
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
-use bevy::{prelude::*, color::palettes::tailwind::*, picking::pointer::PointerInteraction, window::PrimaryWindow, winit::WinitSettings};
 
 /*fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -91,7 +96,7 @@ fn main() {
         .run();
 }
 
-fn setup_cameras(mut commands: Commands, mut game: ResMut<Game>) {
+fn setup_cameras(mut commands: Commands, mut game: ResMut<Game<'static>>) {
     game.camera_should_focus = Vec3::from(RESET_FOCUS);
     game.camera_is_focus = game.camera_should_focus;
     commands.spawn((
@@ -105,7 +110,13 @@ fn setup_cameras(mut commands: Commands, mut game: ResMut<Game>) {
     ));
 }
 
-fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>,asset_server: Res<AssetServer>, mut game: ResMut<Game>, mut materials: ResMut<Assets<StandardMaterial>>) {
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
+    mut game: ResMut<Game<'static>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     let mut rng = if std::env::var("GITHUB_ACTIONS") == Ok("true".to_string()) {
         // We're seeding the PRNG here to make this example deterministic for testing purposes.
         // This isn't strictly required in practical use unless you need your app to be deterministic.
@@ -136,21 +147,25 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>,asset_server: 
             (0..BOARD_SIZE_I)
                 .map(|i| {
                     let height = rng.gen_range(-0.1..0.1);
-                    commands.spawn((
-                        Mesh3d(meshes.add(Cuboid::new(1.0, 0.20, 1.0))),
-                        MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
-                        Transform::from_xyz(i as f32, 0.5, j as f32),
-                    ))
-                    .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
-                    .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
-                    .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
-                    .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()));
+                    commands
+                        .spawn((
+                            Mesh3d(meshes.add(Cuboid::new(1.0, 0.20, 1.0))),
+                            MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
+                            Transform::from_xyz(i as f32, 0.5, j as f32),
+                        ))
+                        .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
+                        .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
+                        .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
+                        .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()));
                     Cell { height }
                 })
                 .collect()
         })
         .collect();
     commands.insert_resource(Random(rng));
+
+    game.unit = Unit::new("Laurel");
+    game.unit.prepare();
 }
 
 const BOARD_SIZE_I: usize = 14;
@@ -177,7 +192,6 @@ const CAMERA_TARGET: Vec3 = Vec3::ZERO;
 
 #[derive(Resource, Deref, DerefMut)]
 struct OriginalCameraTransform(Transform);
-
 
 fn update_camera_transform_system(
     occupied_screen_space: Res<OccupiedScreenSpace>,
@@ -221,16 +235,17 @@ fn setup_system(
     let ground_matl = materials.add(Color::from(GRAY_300));
     let hover_matl = materials.add(Color::from(CYAN_300));
     let pressed_matl = materials.add(Color::from(YELLOW_300));
-    commands.spawn((
-        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-        MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
-        Transform::from_xyz(0.0, 0.5, 0.0),
-    ))
-    .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
-    .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
-    .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
-    .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()))
-    .observe(on_drag_rotate);
+    commands
+        .spawn((
+            Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+            MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
+            Transform::from_xyz(0.0, 0.5, 0.0),
+        ))
+        .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
+        .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
+        .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
+        .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()))
+        .observe(on_drag_rotate);
     commands.spawn((
         PointLight {
             intensity: 1500.0,
@@ -252,7 +267,7 @@ fn ui_example_system(
     mut is_last_selected: Local<bool>,
     mut contexts: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut game: ResMut<Game>
+    mut game: ResMut<Game<'static>>,
 ) {
     let ctx = contexts.ctx_mut();
 
@@ -261,7 +276,10 @@ fn ui_example_system(
         .show(ctx, |ui| {
             ui.label("Left resizeable panel");
             if ui
-                .add(egui::widgets::Button::new(game.board.len().to_string()).selected(!*is_last_selected))
+                .add(
+                    egui::widgets::Button::new(game.board.len().to_string())
+                        .selected(!*is_last_selected),
+                )
                 .clicked()
             {
                 *is_last_selected = false;
@@ -286,10 +304,35 @@ fn ui_example_system(
         .response
         .rect
         .width();
+
     occupied_screen_space.top = egui::TopBottomPanel::top("top_panel")
         .resizable(true)
         .show(ctx, |ui| {
-            ui.label("Top resizeable panel");
+            ui.label(format!(
+                "Name: {} | Health: {}/{} | Magic: {}/{}",
+                game.unit.name,
+                game.unit.current_health,
+                game.unit.max_health,
+                game.unit.current_magic,
+                game.unit.max_magic
+            ));
+            ui.label(format!(
+                "Constitution: {} | Strength: {} | Agility: {} | Intelligence: {}",
+                game.unit.constitution,
+                game.unit.strength,
+                game.unit.agility,
+                game.unit.intelligence
+            ));
+            ui.label(format!(
+                "Initiative: {} | Movement: {} | Jump: {} | Accuracy: {} | Evasion: {} | Critical: {} | Critical Resist: {}",
+                game.unit.initiative,
+                game.unit.movement,
+                game.unit.jump,
+                game.unit.accuracy,
+                game.unit.evasion,
+                game.unit.critical,
+                game.unit.critical_resist
+            ));
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response
