@@ -5,7 +5,7 @@ use neargate::{
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
-use bevy::{prelude::*, window::PrimaryWindow, winit::WinitSettings};
+use bevy::{prelude::*, color::palettes::tailwind::*, picking::pointer::PointerInteraction, window::PrimaryWindow, winit::WinitSettings};
 
 /*fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -105,7 +105,7 @@ fn setup_cameras(mut commands: Commands, mut game: ResMut<Game>) {
     ));
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMut<Game>) {
+fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>,asset_server: Res<AssetServer>, mut game: ResMut<Game>, mut materials: ResMut<Assets<StandardMaterial>>) {
     let mut rng = if std::env::var("GITHUB_ACTIONS") == Ok("true".to_string()) {
         // We're seeding the PRNG here to make this example deterministic for testing purposes.
         // This isn't strictly required in practical use unless you need your app to be deterministic.
@@ -125,6 +125,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMu
         Transform::from_xyz(4.0, 10.0, 4.0),
     ));
 
+    let white_matl = materials.add(Color::WHITE);
+    let ground_matl = materials.add(Color::from(GRAY_300));
+    let hover_matl = materials.add(Color::from(CYAN_300));
+    let pressed_matl = materials.add(Color::from(YELLOW_300));
     // spawn the game board
     let cell_scene = Cell::load_cell_scene(asset_server);
     game.board = (0..BOARD_SIZE_J)
@@ -133,10 +137,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMu
                 .map(|i| {
                     let height = rng.gen_range(-0.1..0.1);
                     commands.spawn((
-                        StateScoped(GameState::Playing),
-                        Transform::from_xyz(i as f32, height - 0.2, j as f32),
-                        SceneRoot(cell_scene.clone()),
-                    ));
+                        Mesh3d(meshes.add(Cuboid::new(1.0, 0.20, 1.0))),
+                        MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
+                        Transform::from_xyz(i as f32, 0.5, j as f32),
+                    ))
+                    .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
+                    .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
+                    .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
+                    .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()));
                     Cell { height }
                 })
                 .collect()
@@ -209,11 +217,19 @@ fn setup_system(
         Mesh3d(meshes.add(Plane3d::default().mesh().size(5.0, 5.0))),
         MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.3))),
     ));
+    let white_matl = materials.add(Color::WHITE);
+    let ground_matl = materials.add(Color::from(GRAY_300));
+    let hover_matl = materials.add(Color::from(CYAN_300));
+    let pressed_matl = materials.add(Color::from(YELLOW_300));
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
         Transform::from_xyz(0.0, 0.5, 0.0),
     ))
+    .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
+    .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
+    .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
+    .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()))
     .observe(on_drag_rotate);
     commands.spawn((
         PointLight {
@@ -296,3 +312,36 @@ fn on_drag_rotate(drag: Trigger<Pointer<Drag>>, mut transforms: Query<&mut Trans
         transform.rotate_x(drag.delta.y * 0.02);
     }
 }
+
+fn update_material_on<E>(
+    new_material: Handle<StandardMaterial>,
+) -> impl Fn(Trigger<E>, Query<&mut MeshMaterial3d<StandardMaterial>>) {
+    // An observer closure that captures `new_material`. We do this to avoid needing to write four
+    // versions of this observer, each triggered by a different event and with a different hardcoded
+    // material. Instead, the event type is a generic, and the material is passed in.
+    move |trigger, mut query| {
+        if let Ok(mut material) = query.get_mut(trigger.entity()) {
+            material.0 = new_material.clone();
+        }
+    }
+}
+
+/// A system that draws hit indicators for every pointer.
+fn draw_mesh_intersections(pointers: Query<&PointerInteraction>, mut gizmos: Gizmos) {
+    for (point, normal) in pointers
+        .iter()
+        .filter_map(|interaction| interaction.get_nearest_hit())
+        .filter_map(|(_entity, hit)| hit.position.zip(hit.normal))
+    {
+        gizmos.sphere(point, 0.05, RED_500);
+        gizmos.arrow(point, point + normal.normalize() * 0.5, PINK_100);
+    }
+}
+
+/// A marker component for our shapes so we can query them separately from the ground plane.
+#[derive(Component)]
+struct Shape;
+
+const SHAPES_X_EXTENT: f32 = 14.0;
+const EXTRUSION_X_EXTENT: f32 = 16.0;
+const Z_EXTENT: f32 = 5.0;
