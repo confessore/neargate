@@ -128,7 +128,7 @@ impl<'a> Unit<'_> {
         self.experience_rate = 1.0;
     }
 
-    fn apply_equipment_base_stats(&mut self) {
+    fn apply_equipment_to_base_stats(&mut self) {
         for equippable in self.equipment.values() {
             self.constitution += equippable.constitution;
             self.strength += equippable.strength;
@@ -137,18 +137,18 @@ impl<'a> Unit<'_> {
         }
     }
 
-    fn apply_equipment_stats(&mut self) {
-        self.apply_equipment_base_stats();
+    fn apply_equipment(&mut self) {
+        self.apply_equipment_to_base_stats();
         self.derive_stats();
-        self.apply_equipment_derived_stats();
+        self.apply_equipment_stats();
     }
 
     fn recalculate_equipment_stats(&mut self) {
         self.derive_stats();
-        self.apply_equipment_derived_stats();
+        self.apply_equipment_stats();
     }
 
-    fn apply_equipment_derived_stats(&mut self) {
+    fn apply_equipment_stats(&mut self) {
         for equippable in self.equipment.values() {
             self.initiative += equippable.initiative;
             self.movement += equippable.movement;
@@ -285,11 +285,7 @@ impl<'a> Unit<'_> {
             .sum::<f32>();
     }
 
-    fn apply_base_auras(&mut self) {
-        self.apply_base_auras_to_base_stats();
-
-        self.recalculate_equipment_stats();
-
+    fn apply_base_auras_to_stats(&mut self) {
         self.experience_rate += self
             .auras
             .iter()
@@ -343,6 +339,12 @@ impl<'a> Unit<'_> {
             .iter()
             .map(|aura| self.critical_resist * &AURAS[aura].critical_resist)
             .sum::<f32>();
+    }
+
+    fn apply_base_auras(&mut self) {
+        self.apply_base_auras_to_base_stats();
+        self.recalculate_equipment_stats();
+        self.apply_base_auras_to_stats();
     }
 
     fn apply_effect_auras_to_base_stats(&mut self) {
@@ -608,7 +610,7 @@ impl<'a> Unit<'_> {
 
     pub fn calculate_stats(&mut self) {
         self.set_base_stats();
-        self.apply_equipment_stats();
+        self.apply_equipment();
         self.apply_equipment_auras();
         self.apply_base_auras();
         self.apply_effect_auras();
