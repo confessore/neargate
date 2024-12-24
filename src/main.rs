@@ -171,6 +171,7 @@ fn setup(
     neck.item_quality = ItemQuality::Unique;
     neck.item_rarity = ItemRarity::Legendary;
     neck.initiative = 1.0;
+    neck.physical_armor = 50.0;
     neck.auras.push("Savage Gladiator");
     game.unit.equip(&helm);
     game.unit.equip(&legs);
@@ -328,12 +329,14 @@ fn ui_example_system(
         .resizable(true)
         .show(ctx, |ui| {
             ui.label(format!(
-                "Name: {} | Health: {}/{} | Magic: {}/{}",
+                "Name: {} | Health: {}/{} | Magic: {}/{} | Physical Armor: {} | Magical Armor: {}",
                 game.unit.name,
                 game.unit.current_health,
                 game.unit.max_health,
                 game.unit.current_magic,
-                game.unit.max_magic
+                game.unit.max_magic,
+                game.unit.physical_armor,
+                game.unit.magical_armor
             ));
             ui.label(format!(
                 "Constitution: {} | Strength: {} | Agility: {} | Intelligence: {}",
