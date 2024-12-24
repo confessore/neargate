@@ -219,12 +219,31 @@ impl<'a> Unit<'_> {
     }
 
     fn apply_effect_auras(&mut self) {
-        for aura in self.auras.iter() {
-            let fetched_aura = &AURAS[aura];
-            self.constitution += self.constitution * fetched_aura.constitution;
-            self.strength += self.strength * fetched_aura.strength;
-            self.agility += self.agility * fetched_aura.agility;
-            self.intelligence += self.intelligence * fetched_aura.intelligence;
+        for effect in self.effects.iter() {
+            let fetched_effect = &EFFECTS[effect.0];
+            self.constitution += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.constitution * &AURAS[aura].constitution)
+                .sum::<f32>();
+
+            self.strength += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.strength * &AURAS[aura].strength)
+                .sum::<f32>();
+
+            self.agility += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.agility * &AURAS[aura].agility)
+                .sum::<f32>();
+
+            self.intelligence += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.intelligence * &AURAS[aura].intelligence)
+                .sum::<f32>();
 
             self.physical_armor = self.constitution * 0.1;
             self.magical_armor = self.intelligence * 0.1;
@@ -236,50 +255,59 @@ impl<'a> Unit<'_> {
             self.critical = self.agility * 0.1;
             self.critical_resist = self.agility * 0.1;
 
-            self.experience_rate += self.experience_rate * fetched_aura.experience_rate;
-            self.initiative += self.initiative * fetched_aura.initiative;
-            self.movement += self.movement * fetched_aura.jump;
-            self.accuracy += self.accuracy * fetched_aura.accuracy;
-            self.evasion += self.evasion * fetched_aura.evasion;
-            self.critical += self.critical * fetched_aura.critical;
-            self.critical_resist += self.critical_resist * fetched_aura.critical_resist;
-            //self.experience += self.experience * fetched_aura.experience;
-            //self.burrowed = self.burrowed || fetched_aura.burrowed;
-            //self.cloaked = self.cloaked || fetched_aura.cloaked;
-            //self.flying = self.flying || fetched_aura.flying;
-            //self.harvestable = self.harvestable || fetched_aura.harvestable;
-            //self.immune = self.immune || fetched_aura.immune;
-            //self.selectable = self.selectable || fetched_aura.selectable;
-            //self.targetable = self.targetable || fetched_aura.targetable;
-        }
+            self.experience_rate += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.experience_rate * &AURAS[aura].experience_rate)
+                .sum::<f32>();
 
-        for effect in self.effects.iter() {
-            let fetched_effect = &EFFECTS[effect.0];
-            for aura in fetched_effect.auras.iter() {
-                let fetched_aura = &AURAS[aura];
-                self.constitution += self.constitution * fetched_aura.constitution;
-                self.strength += self.strength * fetched_aura.strength;
-                self.agility += self.agility * fetched_aura.agility;
-                self.intelligence += self.intelligence * fetched_aura.intelligence;
+            self.initiative += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.initiative * &AURAS[aura].initiative)
+                .sum::<f32>();
 
-                self.physical_armor = self.constitution * 0.1;
-                self.magical_armor = self.intelligence * 0.1;
-                self.initiative = self.agility * 0.1;
-                self.movement = self.agility * 0.1;
-                self.jump = self.agility * 0.1;
-                self.accuracy = self.agility * 0.1;
-                self.evasion = self.agility * 0.1;
-                self.critical = self.agility * 0.1;
-                self.critical_resist = self.agility * 0.1;
+            self.initiative += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.initiative * &AURAS[aura].initiative)
+                .sum::<f32>();
 
-                self.experience_rate += self.experience_rate * fetched_aura.experience_rate;
-                self.initiative += self.initiative * fetched_aura.initiative;
-                self.movement += self.movement * fetched_aura.jump;
-                self.accuracy += self.accuracy * fetched_aura.accuracy;
-                self.evasion += self.evasion * fetched_aura.evasion;
-                self.critical += self.critical * fetched_aura.critical;
-                self.critical_resist += self.critical_resist * fetched_aura.critical_resist;
-            }
+            self.movement += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.movement * &AURAS[aura].movement)
+                .sum::<f32>();
+
+            self.jump += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.jump * &AURAS[aura].jump)
+                .sum::<f32>();
+
+            self.accuracy += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.accuracy * &AURAS[aura].accuracy)
+                .sum::<f32>();
+
+            self.evasion += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.evasion * &AURAS[aura].evasion)
+                .sum::<f32>();
+
+            self.critical += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.critical * &AURAS[aura].critical)
+                .sum::<f32>();
+
+            self.critical_resist += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.critical_resist * &AURAS[aura].critical_resist)
+                .sum::<f32>();
         }
 
         self.max_health = self.constitution * 10.0;

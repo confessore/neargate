@@ -115,7 +115,7 @@ lazy_static! {
                 "Burning",
                 Aura {
                     name: "Burning",
-                    description: "This unit is burning",
+                    description: "This unit is burning losing 20% critical and 20% critical resist",
                     constitution: 0.00,
                     strength: 0.00,
                     agility: 0.00,
@@ -125,8 +125,8 @@ lazy_static! {
                     jump: 0.0,
                     accuracy: 0.0,
                     evasion: 0.0,
-                    critical: 0.0,
-                    critical_resist: 0.0,
+                    critical: -0.2,
+                    critical_resist: -0.2,
                     experience_rate: 0.0,
                     burrowed: false,
                     cloaked: false,
@@ -141,7 +141,7 @@ lazy_static! {
                 "Chilled",
                 Aura {
                     name: "Chilled",
-                    description: "This unit is chilled",
+                    description: "This unit is chilled moving 20% slower and jumping 20% lower",
                     constitution: 0.00,
                     strength: 0.00,
                     agility: 0.00,

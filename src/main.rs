@@ -1,18 +1,19 @@
 use std::fmt;
 
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+use bevy::render::mesh::CylinderAnchor;
 use bevy::{color::palettes::basic::*, input::mouse::MouseButtonInput, prelude::*, ui};
 use bevy::{
     color::palettes::tailwind::*, picking::pointer::PointerInteraction, prelude::*,
     window::PrimaryWindow, winit::WinitSettings,
 };
+use bevy_egui::egui::{text_edit, Sense};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use neargate::{
     Cell, Equippable, Game, GameState, Item, JobType, Spell, Unit, AURAS, CONSUMABLES, SPELLS,
 };
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
-use bevy::render::mesh::CylinderAnchor;
 
 /*fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -99,20 +100,6 @@ fn main() {
         .run();
 }
 
-fn setup_cameras(mut commands: Commands, mut game: ResMut<Game<'static>>) {
-    game.camera_should_focus = Vec3::from(RESET_FOCUS);
-    game.camera_is_focus = game.camera_should_focus;
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(
-            -(BOARD_SIZE_I as f32 / 2.0),
-            2.0 * BOARD_SIZE_J as f32 / 3.0,
-            BOARD_SIZE_J as f32 / 2.0 - 0.5,
-        )
-        .looking_at(game.camera_is_focus, Vec3::Y),
-    ));
-}
-
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -167,28 +154,34 @@ fn setup(
         .collect();
     commands.insert_resource(Random(rng));
 
-    game.unit = Unit::new("Laurel");
+    // Unit
+    game.unit = Unit::new("Wellington");
+    game.unit.auras.push("Savage Gladiator");
+    game.unit.auras.push("Cripple");
+    game.unit.auras.push("Burning");
+    game.unit.auras.push("Chilled");
     game.unit.prepare();
 
     let cylinder_pos = Vec3::new(2.0, 1.0, 2.0);
-    commands.spawn((
-        Shape,
-        Mesh3d(meshes.add(Cylinder {
-            radius: 0.3,
-            half_height: 1.0,
-            ..Default::default()
-        })),
-        MeshMaterial3d(materials.add(Color::srgb(0.8, 0.2, 0.2))),
-        Transform::from_translation(cylinder_pos),
-    ))
-    .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
-    .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
-    .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
-    .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()));
+    commands
+        .spawn((
+            Mesh3d(meshes.add(Cylinder {
+                radius: 0.3,
+                half_height: 1.0,
+                ..Default::default()
+            })),
+            MeshMaterial3d(materials.add(Color::srgb(0.8, 0.2, 0.2))),
+            Transform::from_translation(cylinder_pos),
+        ))
+        .observe(update_material_on::<Pointer<Over>>(hover_matl.clone()))
+        .observe(update_material_on::<Pointer<Out>>(white_matl.clone()))
+        .observe(update_material_on::<Pointer<Down>>(pressed_matl.clone()))
+        .observe(update_material_on::<Pointer<Up>>(hover_matl.clone()));
 
     game.unit.x = cylinder_pos.x as usize;
     game.unit.y = cylinder_pos.y as usize;
     game.unit.z = cylinder_pos.z as usize;
+
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(cylinder_pos.x, cylinder_pos.y + 3.0, cylinder_pos.z + 5.0)
@@ -198,12 +191,6 @@ fn setup(
 
 const BOARD_SIZE_I: usize = 14;
 const BOARD_SIZE_J: usize = 21;
-
-const RESET_FOCUS: [f32; 3] = [
-    BOARD_SIZE_I as f32 / 2.0,
-    0.0,
-    BOARD_SIZE_J as f32 / 2.0 - 0.5,
-];
 
 #[derive(Resource, Deref, DerefMut)]
 struct Random(ChaCha8Rng);
@@ -216,25 +203,20 @@ struct OccupiedScreenSpace {
     bottom: f32,
 }
 
-const CAMERA_TARGET: Vec3 = Vec3::ZERO;
-
-#[derive(Resource, Deref, DerefMut)]
-struct OriginalCameraTransform(Transform);
-
 fn setup_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
+    /*commands.spawn((
         Mesh3d(meshes.add(Plane3d::default().mesh().size(5.0, 5.0))),
         MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.3))),
-    ));
+    ));*/
     let white_matl = materials.add(Color::WHITE);
     let ground_matl = materials.add(Color::from(GRAY_300));
     let hover_matl = materials.add(Color::from(CYAN_300));
     let pressed_matl = materials.add(Color::from(YELLOW_300));
-    commands
+    /*commands
         .spawn((
             Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
             MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
@@ -252,7 +234,7 @@ fn setup_system(
             ..Default::default()
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
-    ));
+    ));*/
 }
 
 fn ui_example_system(
@@ -266,8 +248,8 @@ fn ui_example_system(
     occupied_screen_space.left = egui::SidePanel::left("left_panel")
         .resizable(true)
         .show(ctx, |ui| {
-            ui.label("Left resizeable panel");
-            if ui
+            ui.label("Auras");
+            /*if ui
                 .add(
                     egui::widgets::Button::new(game.board.len().to_string())
                         .selected(!*is_last_selected),
@@ -281,6 +263,11 @@ fn ui_example_system(
                 .clicked()
             {
                 *is_last_selected = true;
+            }*/
+
+            for aura in game.unit.auras.iter() {
+                ui.label(format!("| {} |", *aura));
+                ui.label(format!("{}", AURAS[*aura].description));
             }
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
@@ -290,7 +277,7 @@ fn ui_example_system(
     occupied_screen_space.right = egui::SidePanel::right("right_panel")
         .resizable(true)
         .show(ctx, |ui| {
-            ui.label("Right resizeable panel");
+            ui.label("Equipment");
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response
@@ -333,7 +320,16 @@ fn ui_example_system(
     occupied_screen_space.bottom = egui::TopBottomPanel::bottom("bottom_panel")
         .resizable(true)
         .show(ctx, |ui| {
-            ui.label("Bottom resizeable panel");
+            ui.label("Chat");
+            ui.label("Player1: your mom plays candy crush");
+            ui.label("GIGACHAD: i'll have you know that im a navy seal and i have over 300 confirmed kills");
+            ui.label("Player1: oh my bad");
+            ui.label("Player1: your mom plays farmville");
+            ui.label("GIGACHAD: THAT'S IT");
+            ui.horizontal(|ui| {
+                ui.label("Write something: ");
+                ui.text_edit_singleline(&mut game.unit.name);
+            });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response
@@ -373,14 +369,6 @@ fn draw_mesh_intersections(pointers: Query<&PointerInteraction>, mut gizmos: Giz
     }
 }
 
-/// A marker component for our shapes so we can query them separately from the ground plane.
-#[derive(Component)]
-struct Shape;
-
-const SHAPES_X_EXTENT: f32 = 14.0;
-const EXTRUSION_X_EXTENT: f32 = 16.0;
-const Z_EXTENT: f32 = 5.0;
-
 fn camera_drag_system(
     mouse_button: Res<ButtonInput<MouseButton>>,
     mut mouse_wheel: EventReader<MouseWheel>,
@@ -408,11 +396,16 @@ fn camera_drag_system(
             {
                 // rotate the camera around the location
                 let delta = new_pos - pos;
-                transform.translation = Quat::from_rotation_y(-delta.x * 0.01) * (transform.translation - location) + location;
-                transform.translation = Quat::from_rotation_x(-delta.y * 0.01) * (transform.translation - location) + location;
+                transform.translation = Quat::from_rotation_y(-delta.x * 0.01)
+                    * (transform.translation - location)
+                    + location;
+                transform.translation = Quat::from_rotation_x(-delta.y * 0.01)
+                    * (transform.translation - location)
+                    + location;
                 // keep the translation from looking at the bottom of the board
-                transform.translation.y = (transform.translation - location).y.max(1.0) + location.y;
-                
+                transform.translation.y =
+                    (transform.translation - location).y.max(1.0) + location.y;
+
                 transform.look_at(location, Vec3::Y);
             }
         }
@@ -420,19 +413,26 @@ fn camera_drag_system(
         for event in mouse_wheel.read() {
             match event.unit {
                 MouseScrollUnit::Line => {
-                    println!("Scroll (line units): vertical: {}, horizontal: {}", event.y, event.x);
+                    println!(
+                        "Scroll (line units): vertical: {}, horizontal: {}",
+                        event.y, event.x
+                    );
                     let mut transform = camera_query.iter_mut().next().unwrap();
                     // this should be how close to location the transform is
                     let distance = (transform.translation - location).length();
                     let transform_translation = transform.translation;
-                    transform.translation += (transform_translation - location).normalize() * event.y * 0.1;
+                    transform.translation +=
+                        (transform_translation - location).normalize() * event.y * 0.1;
                     // prevent the camera from getting too close
                     if (transform.translation - location).length() < 1.0 {
                         transform.translation = transform_translation;
                     }
                 }
                 MouseScrollUnit::Pixel => {
-                    println!("Scroll (pixel units): vertical: {}, horizontal: {}", event.y, event.x);
+                    println!(
+                        "Scroll (pixel units): vertical: {}, horizontal: {}",
+                        event.y, event.x
+                    );
                 }
             }
         }
