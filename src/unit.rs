@@ -137,18 +137,7 @@ impl<'a> Unit<'_> {
         }
     }
 
-    fn apply_equipment(&mut self) {
-        self.apply_equipment_to_base_stats();
-        self.derive_stats();
-        self.apply_equipment_stats();
-    }
-
-    fn recalculate_equipment_stats(&mut self) {
-        self.derive_stats();
-        self.apply_equipment_stats();
-    }
-
-    fn apply_equipment_stats(&mut self) {
+    fn apply_equipment_to_stats(&mut self) {
         for equippable in self.equipment.values() {
             self.physical_armor += equippable.physical_armor;
             self.magical_armor += equippable.magical_armor;
@@ -191,12 +180,6 @@ impl<'a> Unit<'_> {
         }
     }
 
-    fn apply_equipment_auras(&mut self) {
-        self.apply_equipment_auras_to_base_stats();
-        //self.recalculate_equipment_stats();
-        self.apply_equipment_auras_to_stats();
-    }
-
     fn derive_stats(&mut self) {
         self.physical_armor = self.strength * 0.1;
         self.magical_armor = self.intelligence * 0.1;
@@ -233,12 +216,6 @@ impl<'a> Unit<'_> {
         }
     }
 
-    fn apply_base_auras(&mut self) {
-        self.apply_base_auras_to_base_stats();
-        //self.recalculate_equipment_stats();
-        self.apply_base_auras_to_stats();
-    }
-
     fn apply_effect_auras_to_base_stats(&mut self) {
         for effect in self.effects.iter() {
             let fetched_effect = &EFFECTS[effect.0];
@@ -267,12 +244,6 @@ impl<'a> Unit<'_> {
                 self.experience_rate += self.experience_rate * &AURAS[aura].experience_rate;
             }
         }
-    }
-
-    fn apply_effect_auras(&mut self) {
-        self.apply_effect_auras_to_base_stats();
-        //self.recalculate_equipment_stats();
-        self.apply_effect_auras_to_stats();
     }
 
     pub fn attack(&mut self, target: &mut Unit<'a>) {
@@ -450,10 +421,15 @@ impl<'a> Unit<'_> {
 
     pub fn calculate_stats(&mut self) {
         self.set_base_stats();
-        self.apply_equipment();
-        self.apply_equipment_auras();
-        self.apply_base_auras();
-        self.apply_effect_auras();
+        self.apply_equipment_to_base_stats();
+        self.apply_base_auras_to_base_stats();
+        self.apply_equipment_auras_to_base_stats();
+        self.apply_effect_auras_to_base_stats();
+        self.derive_stats();
+        self.apply_equipment_to_stats();
+        self.apply_base_auras_to_stats();
+        self.apply_equipment_auras_to_stats();
+        self.apply_effect_auras_to_stats();
         self.derive_max_health();
         self.derive_max_magic();
     }
