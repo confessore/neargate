@@ -158,7 +158,7 @@ fn setup(
     // Unit
     game.unit = Unit::new("Wellington");
     game.unit.auras.push("Savage Gladiator");
-    game.unit.auras.push("Cripple");
+    game.unit.auras.push("Crippled");
     game.unit.effects.insert("Ignite", 3);
     game.unit.effects.insert("Frost", 3);
     let helm = Equippable::new("Order of the Wombat Fez");

@@ -244,64 +244,6 @@ impl<'a> Unit<'_> {
                 .iter()
                 .map(|aura| self.intelligence * &AURAS[aura].intelligence)
                 .sum::<f32>();
-
-            self.physical_armor = self.constitution * 0.1;
-            self.magical_armor = self.intelligence * 0.1;
-            self.initiative = self.agility * 0.1;
-            self.movement = self.agility * 0.1;
-            self.jump = self.agility * 0.1;
-            self.accuracy = self.agility * 0.1;
-            self.evasion = self.agility * 0.1;
-            self.critical = self.agility * 0.1;
-            self.critical_resist = self.agility * 0.1;
-
-            self.experience_rate += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.experience_rate * &AURAS[aura].experience_rate)
-                .sum::<f32>();
-
-            self.initiative += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.initiative * &AURAS[aura].initiative)
-                .sum::<f32>();
-
-            self.movement += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.movement * &AURAS[aura].movement)
-                .sum::<f32>();
-
-            self.jump += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.jump * &AURAS[aura].jump)
-                .sum::<f32>();
-
-            self.accuracy += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.accuracy * &AURAS[aura].accuracy)
-                .sum::<f32>();
-
-            self.evasion += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.evasion * &AURAS[aura].evasion)
-                .sum::<f32>();
-
-            self.critical += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.critical * &AURAS[aura].critical)
-                .sum::<f32>();
-
-            self.critical_resist += fetched_effect
-                .auras
-                .iter()
-                .map(|aura| self.critical_resist * &AURAS[aura].critical_resist)
-                .sum::<f32>();
         }
 
         self.physical_armor = self.constitution * 0.1;

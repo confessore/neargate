@@ -86,12 +86,12 @@ lazy_static! {
                 },
             ),
             (
-                "Cripple",
+                "Crippled",
                 Aura {
-                    name: "Cripple",
-                    description: "Constitution is decreased by 20%",
+                    name: "Crippled",
+                    description: "This unit is crippled losing 20% constitution and 20% strength",
                     constitution: -0.2,
-                    strength: 0.0,
+                    strength: -0.2,
                     agility: 0.0,
                     intelligence: 0.0,
                     initiative: 0.0,
@@ -141,7 +141,7 @@ lazy_static! {
                 "Chilled",
                 Aura {
                     name: "Chilled",
-                    description: "This unit is chilled moving 20% slower and jumping 20% lower",
+                    description: "This unit is chilled losing 20% movement and 20% jump",
                     constitution: 0.00,
                     strength: 0.00,
                     agility: 0.00,
