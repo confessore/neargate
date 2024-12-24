@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use rand::Rng;
 
@@ -58,10 +58,10 @@ pub struct Unit<'a> {
     // Name of the consumable and quantity
     pub consumables: HashMap<&'a str, u32>,
     pub equippables: Vec<Equippable<'a>>,
-    pub equipment: HashMap<EquippableSlot, Equippable<'a>>,
+    pub equipment: BTreeMap<EquippableSlot, Equippable<'a>>,
     pub spellbook: Vec<&'a str>,
     // Name of the effect and how many turns are remaining
-    pub effects: HashMap<&'a str, u8>,
+    pub effects: BTreeMap<&'a str, u8>,
     pub auras: Vec<&'a str>,
 
     pub x: usize,
@@ -110,9 +110,9 @@ impl<'a> Unit<'_> {
             jobs: HashMap::from([(JobType::None, Job::new(JobType::None))]),
             consumables: HashMap::new(),
             equippables: vec![],
-            equipment: HashMap::new(),
+            equipment: BTreeMap::new(),
             spellbook: vec![],
-            effects: HashMap::new(),
+            effects: BTreeMap::new(),
             auras: vec![],
             x: 0,
             y: 0,
@@ -265,6 +265,61 @@ impl<'a> Unit<'_> {
                 .auras
                 .iter()
                 .map(|aura| self.initiative * &AURAS[aura].initiative)
+                .sum::<f32>();
+
+            self.movement += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.movement * &AURAS[aura].movement)
+                .sum::<f32>();
+
+            self.jump += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.jump * &AURAS[aura].jump)
+                .sum::<f32>();
+
+            self.accuracy += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.accuracy * &AURAS[aura].accuracy)
+                .sum::<f32>();
+
+            self.evasion += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.evasion * &AURAS[aura].evasion)
+                .sum::<f32>();
+
+            self.critical += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.critical * &AURAS[aura].critical)
+                .sum::<f32>();
+
+            self.critical_resist += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.critical_resist * &AURAS[aura].critical_resist)
+                .sum::<f32>();
+        }
+
+        self.physical_armor = self.constitution * 0.1;
+        self.magical_armor = self.intelligence * 0.1;
+        self.initiative = self.agility * 0.1;
+        self.movement = self.agility * 0.1;
+        self.jump = self.agility * 0.1;
+        self.accuracy = self.agility * 0.1;
+        self.evasion = self.agility * 0.1;
+        self.critical = self.agility * 0.1;
+        self.critical_resist = self.agility * 0.1;
+
+        for effect in self.effects.iter() {
+            let fetched_effect = &EFFECTS[effect.0];
+            self.experience_rate += fetched_effect
+                .auras
+                .iter()
+                .map(|aura| self.experience_rate * &AURAS[aura].experience_rate)
                 .sum::<f32>();
 
             self.initiative += fetched_effect

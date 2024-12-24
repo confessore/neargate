@@ -1,10 +1,12 @@
 use super::Item;
-use crate::{EquippableSlot, Unit};
+use crate::{EquippableSlot, ItemQuality, ItemRarity, Unit};
 pub mod equippable_slot;
 
 pub struct Equippable<'a> {
     pub name: &'a str,
     pub equippable_slot: EquippableSlot,
+    pub item_quality: ItemQuality,
+    pub item_rarity: ItemRarity,
 }
 
 impl<'a> Equippable<'_> {
@@ -12,11 +14,9 @@ impl<'a> Equippable<'_> {
         Equippable {
             name,
             equippable_slot: EquippableSlot::Head,
+            item_quality: ItemQuality::Standard,
+            item_rarity: ItemRarity::Common,
         }
-    }
-
-    pub fn equip(&self, target: &mut Unit) {
-        println!("Equipping {} with {}", target.name, self.name);
     }
 }
 
@@ -36,6 +36,8 @@ impl Clone for Equippable<'_> {
         Equippable {
             name: self.name,
             equippable_slot: self.equippable_slot,
+            item_quality: self.item_quality,
+            item_rarity: self.item_rarity,
         }
     }
 }

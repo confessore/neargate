@@ -18,6 +18,8 @@ pub use crate::{
     item::{
         consumable::{Consumable, CONSUMABLES},
         equippable::{equippable_slot::EquippableSlot, Equippable},
+        item_quality::ItemQuality,
+        item_rarity::ItemRarity,
         Item,
     },
     job::{job_type::JobType, Job},

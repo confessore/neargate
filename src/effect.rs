@@ -43,7 +43,7 @@ lazy_static! {
                 "Frost",
                 Effect {
                     name: "Frost",
-                    description: "Chills the target with ice slowing their movement by 20%",
+                    description: "Chills the target with ice slowing their movement and jump",
                     value: 0,
                     spell_type: SpellType::Debuff,
                     turns: 3,

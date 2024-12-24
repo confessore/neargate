@@ -10,7 +10,8 @@ use bevy::{
 use bevy_egui::egui::{text_edit, Sense};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use neargate::{
-    Cell, Equippable, Game, GameState, Item, JobType, Spell, Unit, AURAS, CONSUMABLES, SPELLS,
+    Cell, Equippable, EquippableSlot, Game, GameState, Item, ItemQuality, ItemRarity, JobType,
+    Spell, Unit, AURAS, CONSUMABLES, EFFECTS, SPELLS,
 };
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
@@ -158,8 +159,20 @@ fn setup(
     game.unit = Unit::new("Wellington");
     game.unit.auras.push("Savage Gladiator");
     game.unit.auras.push("Cripple");
-    game.unit.auras.push("Burning");
-    game.unit.auras.push("Chilled");
+    game.unit.effects.insert("Ignite", 3);
+    game.unit.effects.insert("Frost", 3);
+    let helm = Equippable::new("Order of the Wombat Fez");
+    let mut legs = Equippable::new("Dressy Pantaloons");
+    legs.equippable_slot = EquippableSlot::Legs;
+    legs.item_quality = ItemQuality::Superior;
+    legs.item_rarity = ItemRarity::Rare;
+    let mut neck = Equippable::new("Necklace of the Silver Monkey");
+    neck.equippable_slot = EquippableSlot::Neck;
+    neck.item_quality = ItemQuality::Unique;
+    neck.item_rarity = ItemRarity::Legendary;
+    game.unit.equip(&helm);
+    game.unit.equip(&legs);
+    game.unit.equip(&neck);
     game.unit.prepare();
 
     let cylinder_pos = Vec3::new(2.0, 1.0, 2.0);
@@ -248,7 +261,6 @@ fn ui_example_system(
     occupied_screen_space.left = egui::SidePanel::left("left_panel")
         .resizable(true)
         .show(ctx, |ui| {
-            ui.label("Auras");
             /*if ui
                 .add(
                     egui::widgets::Button::new(game.board.len().to_string())
@@ -264,10 +276,22 @@ fn ui_example_system(
             {
                 *is_last_selected = true;
             }*/
-
+            ui.label("Effects");
+            for effect in game.unit.effects.iter() {
+                ui.label(format!("| {} | -> {}", effect.0, effect.1));
+                ui.label(format!("{}", EFFECTS[effect.0].description));
+            }
+            ui.label("Auras");
             for aura in game.unit.auras.iter() {
                 ui.label(format!("| {} |", *aura));
                 ui.label(format!("{}", AURAS[*aura].description));
+            }
+            for effect in game.unit.effects.iter() {
+                let fetched_effect = &EFFECTS[effect.0];
+                for aura in fetched_effect.auras.iter() {
+                    ui.label(format!("| {} |", *aura));
+                    ui.label(format!("{}", AURAS[*aura].description));
+                }
             }
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
@@ -278,6 +302,14 @@ fn ui_example_system(
         .resizable(true)
         .show(ctx, |ui| {
             ui.label("Equipment");
+            for equippable in game.unit.equipment.iter() {
+                ui.label(format!("| {} |", equippable.0));
+                ui.label(format!("{}", equippable.1.name));
+                ui.label(format!(
+                    "{} {}",
+                    equippable.1.item_quality, equippable.1.item_rarity
+                ));
+            }
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response
