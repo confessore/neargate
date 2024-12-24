@@ -157,7 +157,7 @@ fn setup(
 
     // Unit
     game.unit = Unit::new("Wellington");
-    game.unit.auras.push("Savage Gladiator");
+    //game.unit.auras.push("Savage Gladiator");
     game.unit.auras.push("Crippled");
     game.unit.effects.insert("Ignite", 3);
     game.unit.effects.insert("Frost", 3);
@@ -170,6 +170,8 @@ fn setup(
     neck.equippable_slot = EquippableSlot::Neck;
     neck.item_quality = ItemQuality::Unique;
     neck.item_rarity = ItemRarity::Legendary;
+    neck.initiative = 1.0;
+    neck.auras.push("Savage Gladiator");
     game.unit.equip(&helm);
     game.unit.equip(&legs);
     game.unit.equip(&neck);
@@ -282,6 +284,12 @@ fn ui_example_system(
                 ui.label(format!("{}", EFFECTS[effect.0].description));
             }
             ui.label("Auras");
+            for equippable in game.unit.equipment.values() {
+                for aura in equippable.auras.iter() {
+                    ui.label(format!("| {} |", *aura));
+                    ui.label(format!("{}", AURAS[*aura].description));
+                }
+            }
             for aura in game.unit.auras.iter() {
                 ui.label(format!("| {} |", *aura));
                 ui.label(format!("{}", AURAS[*aura].description));

@@ -3,8 +3,8 @@ use std::collections::{BTreeMap, HashMap};
 use rand::Rng;
 
 use crate::{
-    Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType, Spell, SpellType,
-    AURAS, EFFECTS,
+    item::equippable, Aura, Consumable, Effect, Equippable, EquippableSlot, Item, Job, JobType,
+    Spell, SpellType, AURAS, EFFECTS,
 };
 
 #[derive(Default)]
@@ -128,6 +128,134 @@ impl<'a> Unit<'_> {
         self.experience_rate = 1.0;
     }
 
+    fn apply_equipment_stats(&mut self) {
+        for equippable in self.equipment.values() {
+            self.constitution += equippable.constitution;
+            self.strength += equippable.strength;
+            self.agility += equippable.agility;
+            self.intelligence += equippable.intelligence;
+        }
+
+        self.physical_armor = self.constitution * 0.1;
+        self.magical_armor = self.intelligence * 0.1;
+        self.initiative = self.agility * 0.1;
+        self.movement = self.agility * 0.1;
+        self.jump = self.agility * 0.1;
+        self.accuracy = self.agility * 0.1;
+        self.evasion = self.agility * 0.1;
+        self.critical = self.agility * 0.1;
+        self.critical_resist = self.agility * 0.1;
+
+        for equippable in self.equipment.values() {
+            self.initiative += equippable.initiative;
+            self.movement += equippable.movement;
+            self.jump += equippable.jump;
+            self.accuracy += equippable.accuracy;
+            self.evasion += equippable.evasion;
+            self.critical += equippable.critical;
+            self.critical_resist += equippable.critical_resist;
+            self.experience_rate += equippable.experience_rate;
+        }
+    }
+
+    fn apply_equipment_auras(&mut self) {
+        for equippable in self.equipment.values() {
+            self.constitution += equippable
+                .auras
+                .iter()
+                .map(|aura| self.constitution * &AURAS[aura].constitution)
+                .sum::<f32>();
+
+            self.strength += equippable
+                .auras
+                .iter()
+                .map(|aura| self.strength * &AURAS[aura].strength)
+                .sum::<f32>();
+
+            self.agility += equippable
+                .auras
+                .iter()
+                .map(|aura| self.agility * &AURAS[aura].agility)
+                .sum::<f32>();
+
+            self.intelligence += equippable
+                .auras
+                .iter()
+                .map(|aura| self.intelligence * &AURAS[aura].intelligence)
+                .sum::<f32>();
+        }
+
+        self.physical_armor = self.constitution * 0.1;
+        self.magical_armor = self.intelligence * 0.1;
+        self.initiative = self.agility * 0.1;
+        self.movement = self.agility * 0.1;
+        self.jump = self.agility * 0.1;
+        self.accuracy = self.agility * 0.1;
+        self.evasion = self.agility * 0.1;
+        self.critical = self.agility * 0.1;
+        self.critical_resist = self.agility * 0.1;
+        for equippable in self.equipment.values() {
+            self.initiative += equippable.initiative;
+            self.movement += equippable.movement;
+            self.jump += equippable.jump;
+            self.accuracy += equippable.accuracy;
+            self.evasion += equippable.evasion;
+            self.critical += equippable.critical;
+            self.critical_resist += equippable.critical_resist;
+            self.experience_rate += equippable.experience_rate;
+        }
+
+        for equippable in self.equipment.values() {
+            self.experience_rate += equippable
+                .auras
+                .iter()
+                .map(|aura| self.experience_rate * &AURAS[aura].experience_rate)
+                .sum::<f32>();
+
+            self.initiative += equippable
+                .auras
+                .iter()
+                .map(|aura| self.initiative * &AURAS[aura].initiative)
+                .sum::<f32>();
+
+            self.movement += equippable
+                .auras
+                .iter()
+                .map(|aura| self.movement * &AURAS[aura].movement)
+                .sum::<f32>();
+
+            self.jump += equippable
+                .auras
+                .iter()
+                .map(|aura| self.jump * &AURAS[aura].jump)
+                .sum::<f32>();
+
+            self.accuracy += equippable
+                .auras
+                .iter()
+                .map(|aura| self.accuracy * &AURAS[aura].accuracy)
+                .sum::<f32>();
+
+            self.evasion += equippable
+                .auras
+                .iter()
+                .map(|aura| self.evasion * &AURAS[aura].evasion)
+                .sum::<f32>();
+
+            self.critical += equippable
+                .auras
+                .iter()
+                .map(|aura| self.critical * &AURAS[aura].critical)
+                .sum::<f32>();
+
+            self.critical_resist += equippable
+                .auras
+                .iter()
+                .map(|aura| self.critical_resist * &AURAS[aura].critical_resist)
+                .sum::<f32>();
+        }
+    }
+
     fn apply_base_auras(&mut self) {
         self.constitution += self
             .auras
@@ -162,6 +290,17 @@ impl<'a> Unit<'_> {
         self.evasion = self.agility * 0.1;
         self.critical = self.agility * 0.1;
         self.critical_resist = self.agility * 0.1;
+
+        for equippable in self.equipment.values() {
+            self.initiative += equippable.initiative;
+            self.movement += equippable.movement;
+            self.jump += equippable.jump;
+            self.accuracy += equippable.accuracy;
+            self.evasion += equippable.evasion;
+            self.critical += equippable.critical;
+            self.critical_resist += equippable.critical_resist;
+            self.experience_rate += equippable.experience_rate;
+        }
 
         self.experience_rate += self
             .auras
@@ -255,6 +394,16 @@ impl<'a> Unit<'_> {
         self.evasion = self.agility * 0.1;
         self.critical = self.agility * 0.1;
         self.critical_resist = self.agility * 0.1;
+        for equippable in self.equipment.values() {
+            self.initiative += equippable.initiative;
+            self.movement += equippable.movement;
+            self.jump += equippable.jump;
+            self.accuracy += equippable.accuracy;
+            self.evasion += equippable.evasion;
+            self.critical += equippable.critical;
+            self.critical_resist += equippable.critical_resist;
+            self.experience_rate += equippable.experience_rate;
+        }
 
         for effect in self.effects.iter() {
             let fetched_effect = &EFFECTS[effect.0];
@@ -375,7 +524,7 @@ impl<'a> Unit<'_> {
             println!("You have already equipped the item: {}", equippable.name);
         } else {
             self.equipment
-                .insert(equippable.equippable_slot, *equippable);
+                .insert(equippable.equippable_slot, equippable.clone());
             println!("You have equipped the item: {}", equippable.name);
         }
     }
@@ -479,6 +628,8 @@ impl<'a> Unit<'_> {
 
     pub fn calculate_stats(&mut self) {
         self.set_base_stats();
+        self.apply_equipment_stats();
+        self.apply_equipment_auras();
         self.apply_base_auras();
         self.apply_effect_auras();
     }
