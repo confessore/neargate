@@ -106,7 +106,6 @@ fn handle_response(mut ev_response: EventReader<TypedResponse<Ping>>) {
     }
 }
 
-use bevy::prelude::*;
 fn main() {
     App::new()
         .init_resource::<Game>()
