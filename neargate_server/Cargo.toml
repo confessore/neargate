@@ -8,3 +8,4 @@ name = "neargate_server"
 path = "src/main.rs"
 
 [dependencies]
+rocket = { version = "0.5.1", features = ["json"] }

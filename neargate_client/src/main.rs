@@ -88,21 +88,21 @@ use serde::Deserialize;
 }*/
 
 #[derive(Debug, Clone, Deserialize, Default)]
-pub struct IpInfo {
-    pub ip: String,
+pub struct Ping {
+    pub message: String,
 }
 
-fn send_request(mut ev_request: EventWriter<TypedRequest<IpInfo>>) {
+fn send_request(mut ev_request: EventWriter<TypedRequest<Ping>>) {
     ev_request.send(
         HttpClient::new()
-            .get("https://api.ipify.org?format=json")
-            .with_type::<IpInfo>(),
+            .get("http://localhost:8000/ping")
+            .with_type::<Ping>(),
     );
 }
 
-fn handle_response(mut ev_response: EventReader<TypedResponse<IpInfo>>) {
+fn handle_response(mut ev_response: EventReader<TypedResponse<Ping>>) {
     for response in ev_response.read() {
-        println!("ip: {}", response.ip);
+        println!("message: {}", response.message);
     }
 }
 
@@ -125,7 +125,7 @@ fn main() {
             Update,
             send_request.run_if(on_timer(std::time::Duration::from_secs(1))),
         )
-        .register_request_type::<IpInfo>()
+        .register_request_type::<Ping>()
         .run();
 }
 
