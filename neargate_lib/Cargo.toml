@@ -1,0 +1,13 @@
+[package]
+name = "neargate_lib"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "neargate_lib"
+path = "src/lib.rs"
+
+[dependencies]
+bevy = "0.15.0"
+rand = "0.8.5"
+lazy_static = "1.5.0"

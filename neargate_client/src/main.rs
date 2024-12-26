@@ -4,17 +4,20 @@ use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::render::mesh::CylinderAnchor;
 use bevy::{color::palettes::basic::*, input::mouse::MouseButtonInput, prelude::*, ui};
 use bevy::{
+    time::common_conditions::on_timer,
     color::palettes::tailwind::*, picking::pointer::PointerInteraction, prelude::*,
     window::PrimaryWindow, winit::WinitSettings,
 };
 use bevy_egui::egui::{text_edit, Sense};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
-use neargate::{
+use bevy_http_client::prelude::*;
+use neargate_lib::{
     Cell, Equippable, EquippableSlot, Game, GameState, Item, ItemQuality, ItemRarity, JobType,
     Spell, Unit, AURAS, CONSUMABLES, EFFECTS, SPELLS,
 };
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
+use serde::Deserialize;
 
 /*fn main() {
     let mut warrior = Unit::new("Warrior");
@@ -84,11 +87,30 @@ use rand_chacha::ChaCha8Rng;
     }
 }*/
 
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct IpInfo {
+    pub ip: String,
+}
+
+fn send_request(mut ev_request: EventWriter<TypedRequest<IpInfo>>) {
+    ev_request.send(
+        HttpClient::new()
+            .get("https://api.ipify.org?format=json")
+            .with_type::<IpInfo>(),
+    );
+}
+
+fn handle_response(mut ev_response: EventReader<TypedResponse<IpInfo>>) {
+    for response in ev_response.read() {
+        println!("ip: {}", response.ip);
+    }
+}
+
 use bevy::prelude::*;
 fn main() {
     App::new()
         .init_resource::<Game>()
-        .add_plugins((DefaultPlugins, MeshPickingPlugin, EguiPlugin))
+        .add_plugins((DefaultPlugins, MeshPickingPlugin, EguiPlugin, HttpClientPlugin))
         .init_resource::<OccupiedScreenSpace>()
         .init_state::<GameState>()
         .enable_state_scoped_entities::<GameState>()
@@ -98,6 +120,12 @@ fn main() {
         //.add_systems(Update, update_camera_transform_system)
         .add_systems(Update, camera_drag_system)
         .add_systems(OnEnter(GameState::Playing), setup)
+        .add_systems(Update, handle_response)
+        .add_systems(
+            Update,
+            send_request.run_if(on_timer(std::time::Duration::from_secs(1))),
+        )
+        .register_request_type::<IpInfo>()
         .run();
 }
 
@@ -131,8 +159,6 @@ fn setup(
     let ground_matl = materials.add(Color::from(GRAY_300));
     let hover_matl = materials.add(Color::from(CYAN_300));
     let pressed_matl = materials.add(Color::from(YELLOW_300));
-    // spawn the game board
-    let cell_scene = Cell::load_cell_scene(asset_server);
     game.board = (0..BOARD_SIZE_J)
         .map(|j| {
             (0..BOARD_SIZE_I)
@@ -172,7 +198,7 @@ fn setup(
     neck.item_quality = ItemQuality::Unique;
     neck.item_rarity = ItemRarity::Legendary;
     neck.initiative = 1.0;
-    neck.physical_armor = 50.0;
+    neck.physical_armor = 1.0;
     neck.auras.push("Savage Gladiator");
     game.unit.equip(&helm);
     game.unit.equip(&legs);
