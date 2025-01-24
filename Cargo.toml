@@ -3,5 +3,4 @@ resolver = "2"
 members = [
     "neargate_client",
     "neargate_lib",
-    "neargate_server",
 ]

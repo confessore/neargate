@@ -10,7 +10,6 @@ use bevy::{
 };
 use bevy_egui::egui::{text_edit, Sense};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
-use bevy_http_client::prelude::*;
 use neargate_lib::{
     Cell, Equippable, EquippableSlot, Game, GameState, Item, ItemQuality, ItemRarity, JobType,
     Spell, Unit, AURAS, CONSUMABLES, EFFECTS, SPELLS,
@@ -87,29 +86,10 @@ use serde::Deserialize;
     }
 }*/
 
-#[derive(Debug, Clone, Deserialize, Default)]
-pub struct Ping {
-    pub message: String,
-}
-
-fn send_request(mut ev_request: EventWriter<TypedRequest<Ping>>) {
-    ev_request.send(
-        HttpClient::new()
-            .get("http://localhost:8000/ping")
-            .with_type::<Ping>(),
-    );
-}
-
-fn handle_response(mut ev_response: EventReader<TypedResponse<Ping>>) {
-    for response in ev_response.read() {
-        println!("message: {}", response.message);
-    }
-}
-
 fn main() {
     App::new()
         .init_resource::<Game>()
-        .add_plugins((DefaultPlugins, MeshPickingPlugin, EguiPlugin, HttpClientPlugin))
+        .add_plugins((DefaultPlugins, MeshPickingPlugin, EguiPlugin))
         .init_resource::<OccupiedScreenSpace>()
         .init_state::<GameState>()
         .enable_state_scoped_entities::<GameState>()
@@ -119,12 +99,6 @@ fn main() {
         //.add_systems(Update, update_camera_transform_system)
         .add_systems(Update, camera_drag_system)
         .add_systems(OnEnter(GameState::Playing), setup)
-        .add_systems(Update, handle_response)
-        .add_systems(
-            Update,
-            send_request.run_if(on_timer(std::time::Duration::from_secs(1))),
-        )
-        .register_request_type::<Ping>()
         .run();
 }
 

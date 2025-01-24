@@ -10,8 +10,7 @@ path = "src/main.rs"
 [dependencies]
 neargate_lib = { path = "../neargate_lib" }
 bevy = "0.15.0"
-bevy_egui = "0.31.1"
-bevy_http_client = "0.7.0"
+bevy_egui = "0.32.0"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
 serde = "1.0.216"
